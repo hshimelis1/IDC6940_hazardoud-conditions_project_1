@@ -1,0 +1,314 @@
+---
+title: "Survival analysis"
+author: "Hermela Shimelis"
+date: today
+format:
+  html:
+    code-fold: true
+    css: custom.css
+editor: 
+  markdown: 
+    wrap: 72
+---
+
+## Data: Survival after chemotherapy for Stage B/C colon cancer
+
+### The data was identified from survival R package
+
+### Description
+
+These are data from one of the first successful trials of adjuvant
+chemotherapy for colon cancer. Levamisole is a low-toxicity compound
+previously used to treat worm infestations in animals; 5-FU is a
+moderately toxic (as these things go) chemotherapy agent. There are two
+records per person, one for recurrence and one for death.
+
+The purpose of this project is to compare survival between the untreated
+(Obs) group vs those treated with amisole (Lev), or amisole + 5-FU.
+
+Column names:
+
+|           |                                                                                   |
+|:---------------|:-------------------------------------------------------|
+| id:       | id                                                                                |
+| study:    | 1 for all patients                                                                |
+| rx:       | Treatment - Obs(ervation), Lev(amisole), Lev(amisole)+5-FU                        |
+| sex:      | 1=male                                                                            |
+| age:      | in years                                                                          |
+| obstruct: | obstruction of colon by tumour                                                    |
+| perfor:   | perforation of colon                                                              |
+| adhere:   | adherence to nearby organs                                                        |
+| nodes:    | number of lymph nodes with detectable cancer                                      |
+| time:     | days until event or censoring                                                     |
+| status:   | censoring status                                                                  |
+| differ:   | differentiation of tumour (1=well, 2=moderate, 3=poor)                            |
+| extent:   | Extent of local spread (1=submucosa, 2=muscle, 3=serosa, 4=contiguous structures) |
+| surg:     | time from surgery to registration (0=short, 1=long)                               |
+| node4:    | more than 4 positive lymph nodes                                                  |
+| etype:    | event type: 1=recurrence,2=death                                                  |
+|           |                                                                                   |
+
+```{r}
+#| echo: true
+#| message: false
+
+# Load library
+library(dplyr)
+library(survival)
+library(janitor)
+library(magrittr)
+
+```
+
+```{r}
+#| echo: true
+#| message: false
+
+#Load data
+colon <- as_tibble(colon)
+head(colon)
+```
+
+Since the current analysis is focused on survival, create a new variable
+for recurrence time. This will create a data table with one row per
+individual.
+
+```{r}
+colon_surv <- colon%>%filter(etype == 2) 
+
+# Identify participants with outome = death (not censored)
+colon_surv$death <- if_else(colon_surv$status == 1, 0, 1) 
+
+```
+
+Identify participants who had recurrence. Identify those not censorred
+for recurrence event. Filter event type = 1 (recurrence), status = 0
+(not censored).
+
+```{r}
+recurrence <- colon%>%filter(etype == 1 & status == 0)%>%select(id)
+recurrence <- recurrence%>%mutate(recurrence = 1) # list of patients with recurrence
+
+
+colon_surv <- colon_surv%>%merge(recurrence, by = "id", all.x = TRUE)
+colon_surv$recurrence[is.na(colon_surv$recurrence)] <- 0
+
+```
+
+## I. Exploratory data analysis
+
+**Check missing values**
+
+```{r}
+
+na_counts <- sapply(colon_surv, function(x)sum(is.na(x)))
+na_counts
+
+# replace NAs with mode
+table(colon_surv$differ)
+mode(colon_surv$differ)
+median(colon_surv$nodes, na.rm= TRUE)
+
+colon_surv$differ <- if_else(is.na(colon_surv$differ), 2,colon_surv$differ)
+colon_surv$nodes <- if_else(is.na(colon_surv$nodes), 2,colon_surv$nodes)
+```
+
+**Insight:** only nodes and differ columns have NA values. Replacing the
+23 NAs in differ column with mode, and replace NAs in nodes with median.
+
+**Evaluate continuous variables**
+
+```{r}
+#| echo: true
+#| message: false
+
+# age
+hist(colon_surv$age)
+hist(colon_surv$nodes)
+hist(colon_surv$time)
+
+
+```
+
+**Insight:** Age is normally distribute. Number of nodes is skewed to
+the right. Time is fairly normally distributed with most the individuals
+had event time between 500-3000 days.
+
+Evaluate nodes column to investigate outliers
+
+```{r}
+t <- colon_surv%>%filter(node4 ==1) # samples with more than positive lymph nodes
+hist(t$nodes) 
+
+```
+
+**Insight:** samples with greater than 4 lymph nodes have less than 5
+count in nodes column, so the two columns are not consistent. Therefore,
+nodes column will not be used for further analysis.
+
+**Evaluate categorical variables**
+
+```{r }
+#| echo: true
+#| message: false
+ 
+summary_table <- colon_surv%>%summarise(count =n(),
+                                        male = sum(sex), 
+                                                       median_age = median(age),
+                                                       ct_perforation = sum(perfor),
+                                                       ct_adherence_nerby_organ = sum(adhere),
+                                                       ct_death = sum(death))
+
+summary_table
+```
+
+**Insight:** Total number of participants: 929. About half of the
+participants are male and about half were censored, while the other half
+died.
+
+```{r}
+
+colon_surv <- colon_surv%>%mutate(differentiation = case_when(differ == 1 ~ "well",
+                                                              differ == 2 ~ "moderate",
+                                                              differ == 3 ~ "poor"),
+                                  local_spread = case_when(extent == 1 ~ "submucosa",
+                                                           extent == 2 ~ "muscle",
+                                                           extent == 3 ~ "serosa",
+                                                           extent == 4 ~ "contiguous"),
+                                  surg_to_reg_time = case_when(surg == 0~ "short",
+                                                               surg == 1 ~ "long"))
+
+
+
+```
+
+**Frequency tables for categorical variables**
+
+```{r}
+# frequency tables for categorical variables
+# Tumor differentiation
+colon_surv %>% 
+  tabyl(differentiation, rx) %>%
+  adorn_percentages("col") %>%
+  adorn_pct_formatting(digits = 1) %>% 
+  adorn_ns()
+
+# extent of local spread
+colon_surv %>% 
+  tabyl(local_spread, rx) %>%
+  adorn_percentages("col") %>%
+  adorn_pct_formatting(digits = 1) %>% 
+  adorn_ns()
+
+# colum obstruction
+colon_surv %>% 
+  tabyl(obstruct, rx) %>%
+  adorn_percentages("col") %>%
+  adorn_pct_formatting(digits = 1) %>% 
+  adorn_ns()
+
+
+# colon perforation
+colon_surv %>% 
+  tabyl(perfor, rx) %>%
+  adorn_percentages("col") %>%
+  adorn_pct_formatting(digits = 1) %>% 
+  adorn_ns()
+
+# Adherance to nearby organs
+colon_surv %>% 
+  tabyl(adhere, rx) %>%
+  adorn_percentages("col") %>%
+  adorn_pct_formatting(digits = 1) %>% 
+  adorn_ns()
+
+# extent of local tumor spread
+colon_surv %>% 
+  tabyl(local_spread, rx) %>%
+  adorn_percentages("col") %>%
+  adorn_pct_formatting(digits = 1) %>% 
+  adorn_ns()
+
+# More than 4 lymph nodes with cancer
+colon_surv %>% 
+  tabyl(node4, rx) %>%
+  adorn_percentages("col") %>%
+  adorn_pct_formatting(digits = 1) %>% 
+  adorn_ns()
+
+# Recurrence
+colon_surv %>% 
+  tabyl(recurrence, rx) %>%
+  adorn_percentages("col") %>%
+  adorn_pct_formatting(digits = 1) %>% 
+  adorn_ns()
+
+# time from surgery to registration
+colon_surv %>% 
+  tabyl(surg, rx) %>%
+  adorn_percentages("col") %>%
+  adorn_pct_formatting(digits = 1) %>% 
+  adorn_ns()
+```
+
+\
+**Summary statistics grouped by treatment**
+
+```{r #| echo: true#| message: false}
+
+summary_table <- colon_surv%>%group_by(rx)%>%summarise(count =n(),
+                                                       male = sum(sex),
+                                                       median_age = median(age),
+                                                       ct_perforation = sum(perfor),
+                                                       ct_adherence_nerby_organ = sum(adhere),
+                                                       ct_death = sum(death),
+                                                       perc_male = (male/count)*100,
+                                                       iqr_age = IQR(age))
+summary_table
+
+g <- colon_surv%>%filter(rx == "Lev+5FU")
+summary(g$age)
+```
+
+**Insight:** Each treatment group had about 300 participants. Median
+age, number of participants with perforation and adherence are similar
+between the three groups. Whereas the total number of death are higher
+in the Lev+5FU group.
+
+## II. Table 1: Description of the study population
+
+```{=html}
+<style type="text/css">
+.tg  {border-collapse:collapse;border-spacing:0;}
+.tg td{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
+  overflow:hidden;padding:10px 5px;word-break:normal;}
+.tg th{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
+  font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;}
+.tg .tg-bobw{font-weight:bold;text-align:center;vertical-align:bottom}
+.tg .tg-7zrl{text-align:left;vertical-align:bottom}
+.tg .tg-8d8j{text-align:center;vertical-align:bottom}
+.tg .tg-j6zm{font-weight:bold;text-align:left;vertical-align:bottom}
+</style>
+```
+|                                             |                            | Observation (%) | Amisole (%)  | Amisole + 5-FU (%) |
+|--------------------|-------------|-------------|-------------|-------------|
+|                                             |                            | N=315           | N=310        | N=304              |
+| Demographics                                |                            |                 |              |                    |
+|                                             | Male                       | 166 (52.3)      | 177 (57.1)   | 141                |
+|                                             | Median age (years) \[IQR\] | 60 \[53,68\]    | 61 \[53,69\] | 61 \[52,70\]       |
+| Cancer characterstics                       |                            |                 |              |                    |
+|                                             | Colon obstruction          | 63 (20.0)       | 63 (20.3)    | 54 (17.8)          |
+|                                             | Colon perforation          | 9 (2.9)         | 10 (3.2)     | 8 (2.6)            |
+|                                             | Adherence to nearby organs | 47 (14.9)       | 49 (15.8)    | 39 (12.8)          |
+| Differentiation of tumor                    |                            |                 |              |                    |
+|                                             | Well                       | 27 (8.6)        | 37 (11.9)    | 29 (9.5)           |
+|                                             | Moderate                   | 236 (74.9)      | 229 (73.9)   | 221 (72.7)         |
+|                                             | Poor                       | 52 (16.5)       | 44 (14.2)    | 54 (17.8)          |
+| Extent of local spread                      |                            |                 |              |                    |
+|                                             | Contiguous                 | 20 (6.3)        | 12 (3.9)     | 11 (3.6)           |
+|                                             | Muscle                     | 38 (12.1)       | 36 (11.6)    | 32 (10.5)          |
+|                                             | Serosa                     | 249 (79.0)      | 259 (83.5)   | 251 (82.6)         |
+|                                             | Submucosa                  | 8 (2.5)         | 3 (1.0)      | 10 (3.3)           |
+| More than 4 lymh nodes with cancer          | Yes                        | 87 (27.6)       | 89 (28.7)    | 79 (26.0)          |
+| Recurrence (%)                              | Yes                        | 138 (43.8)      | 138 (44.5)   | 185 (60.9)         |
+| Short time from surgery to registration (%) | Yes                        | 91 (28.9)       | 80 (25.8)    | 76 (25.0)          |
