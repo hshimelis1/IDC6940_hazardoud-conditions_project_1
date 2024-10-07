@@ -732,7 +732,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p><img src="index_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-<p>Insight: The time for 50% Survival probability of the group treated with Lev+5Fu is over 3000 days while the survival time for the observation and Lev group is around 2000 days</p>
+<p><strong>Insight:</strong> The time for 50% Survival probability of the group treated with Lev+5Fu is over 3000 days while the survival time for the observation and Lev group is around 2000 days</p>
 </section>
 <section id="perform-cox-regression-to-test-whether-treatment-is-significant-predictor" class="level4">
 <h4 class="anchored" data-anchor-id="perform-cox-regression-to-test-whether-treatment-is-significant-predictor">Perform cox regression to test whether treatment is significant predictor</h4>
@@ -769,9 +769,7 @@ Wald test            = 11.56  on 2 df,   p=0.003
 Score (logrank) test = 11.68  on 2 df,   p=0.003</code></pre>
 </div>
 </div>
-</section>
-<section id="insight-the-coefficient-of-lev-is-not-significant-suggesting-that-there-is-no-evidence-that-this-treatment-affects-survival-time-compared-to-observation.-however-lev5fu-is-significant-p0.00175-indicating-that-the-treatment-lev-5fu-has-a-statistically-significant-effect-on-survival-time-compared-to-the-reference-group.-the-negative-sign-indicates-that-this-treatment-group-has-a-lower-hazard-and-likely-a-longer-survival-time." class="level4">
-<h4 class="anchored" data-anchor-id="insight-the-coefficient-of-lev-is-not-significant-suggesting-that-there-is-no-evidence-that-this-treatment-affects-survival-time-compared-to-observation.-however-lev5fu-is-significant-p0.00175-indicating-that-the-treatment-lev-5fu-has-a-statistically-significant-effect-on-survival-time-compared-to-the-reference-group.-the-negative-sign-indicates-that-this-treatment-group-has-a-lower-hazard-and-likely-a-longer-survival-time.">Insight: the coefficient of Lev is not significant, suggesting that there is no evidence that this treatment affects survival time compared to observation. however Lev+5Fu is significant (p=0.00175), indicating that the treatment Lev +5Fu has a statistically significant effect on survival time compared to the reference group. The negative sign indicates that this treatment group has a lower hazard and likely a longer survival time.</h4>
+<p><strong>Insight:</strong> the coefficient of Lev is not significant, suggesting that there is no evidence that this treatment affects survival time compared to observation. however Lev+5Fu is significant (p=0.00175), indicating that the treatment Lev +5Fu has a statistically significant effect on survival time compared to the reference group. The negative sign indicates that this treatment group has a lower hazard and likely a longer survival time.</p>
 <p>The hazard ratio for Lex+5FU (0.690), indicating the risk of death is about 31% lower compared to the observation group.</p>
 <p>The p-values indicate that the model is significant.</p>
 </section>
@@ -840,12 +838,8 @@ Score (logrank) test = 708.6  on 12 df,   p=&lt;2e-16</code></pre>
 [21] "surg_to_reg_time"</code></pre>
 </div>
 </div>
-</section>
-<section id="insight-when-all-variables-are-included-in-the-model-age-obstruction-differentiation-and-recurrence-were-significant-predictor.-however-treatment-is-no-longer-significant." class="level4">
-<h4 class="anchored" data-anchor-id="insight-when-all-variables-are-included-in-the-model-age-obstruction-differentiation-and-recurrence-were-significant-predictor.-however-treatment-is-no-longer-significant.">Insight: When all variables are included in the model, age, obstruction, differentiation, and recurrence were significant predictor. However, treatment is no longer significant.</h4>
-</section>
-<section id="investigate-the-best-set-of-predictors-to-include-in-the-model.-check-multicollinearity." class="level4">
-<h4 class="anchored" data-anchor-id="investigate-the-best-set-of-predictors-to-include-in-the-model.-check-multicollinearity.">Investigate the best set of predictors to include in the model. check multicollinearity.</h4>
+<p><strong>Insight:</strong> When all variables are included in the model, age, obstruction, differentiation, and recurrence were significant predictor. However, treatment is no longer significant.</p>
+<p>Investigate the best set of predictors to include in the model. check multicollinearity.</p>
 </section>
 </section>
 
