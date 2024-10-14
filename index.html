@@ -738,8 +738,26 @@ div.csl-indent {
 </tbody>
 </table>
 </section>
-<section id="iii.-preliminary-analysis" class="level2">
-<h2 class="anchored" data-anchor-id="iii.-preliminary-analysis">III. Preliminary analysis</h2>
+<section id="iii.-methods" class="level1">
+<h1>III. Methods</h1>
+<p>The Cox proportional hazards model was used to model the relationship between survival time and different lung cancer treatments. In particlular the survival time will be compared between the untreated group (observation) vs those treated with amisole (Lev), or amisole + 5-FU. The Cox regression model was chosen for this study because it is useful for studying association between survival time of patients and predictors and allows estimating the relative risk or hazard ratios due to the covariates, i.e., treatment status. The time (in days) until event, i.e, death, will be modeled as a function of treatment and other variables, including age, sex, and various tumor characteristics. Significant predictors were included in the final model.</p>
+<section id="statistical-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="statistical-analysis">Statistical analysis</h2>
+<p>The R statistical software version 4.3.2 <span class="citation" data-cites="R_citation"><a href="#ref-R_citation" role="doc-biblioref">[1]</a></span> was used for all analysis. The Survival package was used to consturct the Cox regression model <span class="citation" data-cites="survival-package"><a href="#ref-survival-package" role="doc-biblioref">[2]</a></span> <span class="citation" data-cites="survival-book"><a href="#ref-survival-book" role="doc-biblioref">[3]</a></span>.</p>
+<p>Cox regression model is based on the hazard function <span class="math inline">\(h_x(t)\)</span> with covariates at time t given by:</p>
+<p><span class="math inline">\(h_x(t)=h_0(t)\exp(\beta_1x_1 +\beta_2x_2 + \dots + \beta_p x_n)\)</span></p>
+<p>Where:</p>
+<p><span class="math inline">\(h_x(t)\)</span> is the hazard function</p>
+<p><span class="math inline">\(h_0(t)\)</span> is the baseline hazard function</p>
+<p><span class="math inline">\(\beta_1x_1 + \beta_2x_2 + \dots +\beta_p x_n\)</span> represent the linear combination of covariates and their coefficient</p>
+<p>The hazards for the observation vs.&nbsp;amisole (Lev), or amisole + 5-FU group with covariate values x<sub>1</sub> and x<sub>2</sub> are given by by hx<sub>1</sub>(t) = h<sub>0</sub>(t) exp(βx<sub>1</sub>) and hx<sub>2</sub>(t) = h<sub>0</sub>(t) exp(βx<sub>2</sub>) respectively</p>
+<p>The hazard ratio is expressed as: HR = hx<sub>2</sub>(t)/ hx<sub>1</sub>(t) = exp[β(x<sub>2</sub>- x<sub>1</sub>)]</p>
+<p>The Schoenfeld residual plot was constructed to test Cox proportional hazards assumption. When the proportional hazards assumpiton was not met for any of the covariates, stratification approach was explored. The Survminer <span class="citation" data-cites="survminer"><a href="#ref-survminer" role="doc-biblioref">[4]</a></span> package was used to plot the Kaplan-Meier curve to visualize the survival probability over time for each treatment group.</p>
+<p>Multicolinearity was tested using Variant Inflation Factor (VIF) calculated using MASS package <span class="citation" data-cites="MASS"><a href="#ref-MASS" role="doc-biblioref">[5]</a></span>.</p>
+</section>
+</section>
+<section id="iv.-cox-regression-model" class="level1">
+<h1>IV. Cox regression model</h1>
 <section id="plot-survival-curve-stratified-by-treatment-group" class="level4">
 <h4 class="anchored" data-anchor-id="plot-survival-curve-stratified-by-treatment-group">Plot survival curve stratified by treatment group</h4>
 <div class="cell">
@@ -897,26 +915,8 @@ Score (logrank) test = 708.6  on 12 df,   p=&lt;2e-16</code></pre>
 </div>
 </div>
 <p><strong>Insight:</strong> When all variables are included in the model, age, obstruction, differentiation, and recurrence were significant predictor. However, treatment is no longer significant.</p>
-</section>
-</section>
-</section>
-<section id="methods" class="level1">
-<h1>Methods</h1>
-<p>The Cox proportional hazards model was used to model the relationship between survival time and different lung cancer treatments. In particlular the survival time will be compared between the untreated group (observation) vs those treated with amisole (Lev), or amisole + 5-FU. The Cox regression model was chosen for this study because it is useful for studying association between survival time of patients and predictors and allows estimating the relative risk or hazard ratios due to the covariates, i.e., treatment status. The time (in days) until event, i.e, death, will be modeled as a function of treatment and other variables, including age, sex, and various tumor characteristics. Significant predictors were included in the final model.</p>
-<section id="statistical-analysis" class="level2">
-<h2 class="anchored" data-anchor-id="statistical-analysis">Statistical analysis</h2>
-<p>The R statistical software version 4.3.2 <span class="citation" data-cites="R_citation"><a href="#ref-R_citation" role="doc-biblioref">[1]</a></span> was used for all analysis. The Survival package was used to consturct the Cox regression model <span class="citation" data-cites="survival-package"><a href="#ref-survival-package" role="doc-biblioref">[2]</a></span> <span class="citation" data-cites="survival-book"><a href="#ref-survival-book" role="doc-biblioref">[3]</a></span>.</p>
-<p>Cox regression model is based on the hazard function <span class="math inline">\(h_x(t)\)</span> with covariates at time t given by:</p>
-<p><span class="math inline">\(h_x(t)=h_0(t)\exp(\beta_1x_1 +\beta_2x_2 + \dots + \beta_p x_n)\)</span></p>
-<p>Where:</p>
-<p><span class="math inline">\(h_x(t)\)</span> is the hazard function</p>
-<p><span class="math inline">\(h_0(t)\)</span> is the baseline hazard function</p>
-<p><span class="math inline">\(\beta_1x_1 + \beta_2x_2 + \dots +\beta_p x_n\)</span> represent the linear combination of covariates and their coefficient</p>
-<p>The hazards for the observation vs.&nbsp;amisole (Lev), or amisole + 5-FU group with covariate values x<sub>1</sub> and x<sub>2</sub> are given by by hx<sub>1</sub>(t) = h<sub>0</sub>(t) exp(βx<sub>1</sub>) and hx<sub>2</sub>(t) = h<sub>0</sub>(t) exp(βx<sub>2</sub>) respectively</p>
-<p>The hazard ratio is expressed as: HR = hx<sub>2</sub>(t)/ hx<sub>1</sub>(t) = exp[β(x<sub>2</sub>- x<sub>1</sub>)]</p>
-<p>The Schoenfeld residual plot was constructed to test Cox proportional hazards assumption. When the proportional hazards assumpiton was not met for any of the covariates, stratification approach was explored. The Survminer <span class="citation" data-cites="survminer"><a href="#ref-survminer" role="doc-biblioref">[4]</a></span> package was used to plot the Kaplan-Meier curve to visualize the survival probability over time for each treatment group.</p>
-<p>Multicolinearity was tested using Variant Inflation Factor (VIF) calculated using MASS package <span class="citation" data-cites="MASS"><a href="#ref-MASS" role="doc-biblioref">[5]</a></span>.</p>
 
+</section>
 </section>
 </section>
 
