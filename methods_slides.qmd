@@ -1,6 +1,6 @@
 ---
 title: "Survival analysis"
-author: "Hermela Shimelis"
+author: "Kayla Boyd and Hermela Shimelis"
 date: today
 format:
   html:
