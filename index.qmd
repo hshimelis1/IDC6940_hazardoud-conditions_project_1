@@ -1,5 +1,5 @@
 ---
-title: "Survival analysis"
+title: "EDA and Methods"
 author: "Hermela Shimelis"
 date: today
 format:
@@ -60,6 +60,8 @@ library(dplyr)
 library(survival)
 library(janitor)
 library(magrittr)
+
+#print(citation("survival"), bibtex=TRUE)
 
 ```
 
@@ -316,7 +318,58 @@ in the Lev+5FU group.
 | Recurrence (%)                              | Yes                        | 138 (43.8)      | 138 (44.5)   | 185 (60.9)         |
 | Short time from surgery to registration (%) | Yes                        | 91 (28.9)       | 80 (25.8)    | 76 (25.0)          |
 
-## III. Preliminary analysis
+# III. Methods
+
+The Cox proportional hazards model was used to model the relationship
+between survival time and different lung cancer treatments. In
+particlular the survival time will be compared between the untreated
+group (observation) vs those treated with amisole (Lev), or amisole +
+5-FU. The Cox regression model was chosen for this study because it is
+useful for studying association between survival time of patients and
+predictors and allows estimating the relative risk or hazard ratios due
+to the covariates, i.e., treatment status. The time (in days) until
+event, i.e, death, will be modeled as a function of treatment and other
+variables, including age, sex, and various tumor characteristics.
+Significant predictors were included in the final model.
+
+## Statistical analysis
+
+The R statistical software version 4.3.2 [@R_citation] was used for all
+analysis. The Survival package was used to consturct the Cox regression
+model [@survival-package] [@survival-book].
+
+Cox regression model is based on the hazard function $h_x(t)$ with
+covariates at time t given by:
+
+$h_x(t)=h_0(t)\exp(\beta_1x_1 +\beta_2x_2 + \dots + \beta_p x_n)$
+
+Where:
+
+$h_x(t)$ is the hazard function
+
+$h_0(t)$ is the baseline hazard function
+
+$\beta_1x_1 + \beta_2x_2 + \dots +\beta_p x_n$ represent the linear
+combination of covariates and their coefficient
+
+The hazards for the observation vs. amisole (Lev), or amisole + 5-FU
+group with covariate values x~1~ and x~2~ are given by by hx~1~(t) =
+h~0~(t) exp(βx~1~) and hx~2~(t) = h~0~(t) exp(βx~2~) respectively
+
+The hazard ratio is expressed as: HR = hx~2~(t)/ hx~1~(t) = exp\[β(x~2~-
+x~1~)\]
+
+The Schoenfeld residual plot was constructed to test Cox proportional
+hazards assumption. When the proportional hazards assumpiton was not met
+for any of the covariates, stratification approach was explored. The
+Survminer [@survminer] package was used to plot the Kaplan-Meier curve
+to visualize the survival probability over time for each treatment
+group.
+
+Multicolinearity was tested using Variant Inflation Factor (VIF)
+calculated using MASS package [@MASS].
+
+# IV. Cox regression model
 
 #### Plot survival curve stratified by treatment group
 
@@ -384,11 +437,11 @@ plot(zph_test)
 
 ```
 
-The Schoenfeld residal plot shows that the residuals are scattered
-randomly and the smooth trend line is horizontal near 0. This suggests
-that the hazard ratio for rx (treatment status) is constant over time
-and the proportional hazard assumption is met. The global p-value is
-\>0.05, indicating that the the assumption is met.
+**Insight:** The Schoenfeld residal plot shows that the residuals are
+scattered randomly and the smooth trend line is horizontal near 0. This
+suggests that the hazard ratio for rx (treatment status) is constant
+over time and the proportional hazard assumption is met. The global
+p-value is \>0.05, indicating that the the assumption is met.
 
 #### Perform multivariate analysis, including all variables to determine which predictors are significant.
 
@@ -402,99 +455,8 @@ m2 <- coxph(Surv(time, status) ~ rx+ age + sex + surg + obstruct + differentiati
               recurrence + local_spread, data = colon_surv)
 summary(m2)
 
-names(colon_surv)
-print(citation("survival"), bibtex=TRUE)
-print(citation("survminer"), bibtex=TRUE)
-print(citation("MASS"), bibtex=TRUE)
 ```
 
 **Insight:** When all variables are included in the model, age,
 obstruction, differentiation, and recurrence were significant predictor.
 However, treatment is no longer significant.
-
-Investigate the best set of predictors to include in the model. check
-multicollinearity
-
-# Methods
-
-compare survival between the untreated (Obs) group vs those treated with
-amisole (Lev), or amisole + 5-FU.
-
-The Cox proportional hazards model is used to model the relationship
-between survival time and different lung cancer treatments. In
-particlular the survival time will be compared between the untreated
-group (observation) vs those treated with amisole (Lev), or amisole +
-5-FU. The Cox regression is chosen for this study because it useful for
-studying association between survival time of patients and predictors
-and allows estimating the relative risk or hazard ratios due to the
-covariates, i.e., treatment status. The time (days) until event, i.e,
-death, will be modeled as a function of treatment and other variables,
-including age, sex, and various tumor characteristics. Significant
-predictors will be included in the final model.
-
-## Statistical analysis
-
-The R statistical software version 4.3.2 [@R_citation] was used for all
-analysis. The Survival package was used for Cox regression
-[@survival-package] [@survival-book].
-
-Cox regression model is based on the hazard function $h_x(t)$ with
-covariates at time t given by:
-
-$h_x(t)=h_0(t)\exp(\beta_1x_1 +\beta_2x_2 + \dots + \beta_p x_n)$
-
-Where:
-
-$h_x(t)$ is the hazard function
-
-$h_0(t)$ is the baseline hazard function
-
-$\beta_1x_1 + \beta_2x_2 + \dots +\beta_p x_n$ represent the linear
-combination of covariates and their coefficient
-
-The Schoenfeld residual plot was constructed to test Cox proportional
-hazards assumption. If the proportional hazards assumpiton is not met
-for any of the covariates, stratification approach will be used. The
-Survminer [@survminer] package was used to plot the Kaplan-Meier curve
-to visualize the survival probability over time for each treatment
-group.
-
-Multicolinearity was tested using Variant Inflation Factor (VIF)
-calculated using MASS package [@MASS].
-
-```{r}
-library(survival)
-library(car)
-library(MASS) # For variance inflation factor (VIF)
-
-surv_object <- Surv(time = colon_surv$time, event = colon_surv$status)
-
-# Fit a null model
-null_model <- coxph(surv_object ~ 1, data = colon_surv)
-
-# Fit a full model with all potential covariates
-full_model <- coxph(surv_object ~ rx+ age + sex + surg + obstruct + differentiation +
-              recurrence + local_spread, data = colon_surv)
-
-full_model <- coxph(surv_object ~ rx+ age +  obstruct + differentiation +
-              recurrence + local_spread, data = colon_surv)
-
-summary(full_model)
-# Stepwise selection
-step_model <- stepAIC(null_model, scope = list(lower = null_model, upper = full_model), direction = "both")
-summary(step_model)
-
-# Check VIF for the selected model
-vif_values <- vif(step_model)
-
-# Print VIF values
-print(vif_values)
-
-names(colon_surv)
-
-```
-
-different for survival analysis, which estimates the time until a
-particular event occurs, including death or disease. The model
-investigates the association between survival time of patients and
-predictors [@Tibshirani2022-yr].

@@ -7,9 +7,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Hermela Shimelis">
-<meta name="dcterms.date" content="2024-10-06">
+<meta name="dcterms.date" content="2024-10-13">
 
-<title>Survival analysis EDA + preliminary analysis</title>
+<title>EDA and Methods</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -56,7 +56,26 @@ div.sourceCode
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-</style>
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 
 <script src="index_files/libs/clipboard/clipboard.min.js"></script>
@@ -70,6 +89,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="index_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="index_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
 
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
 <link rel="stylesheet" href="custom.css">
 </head>
@@ -82,7 +103,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Survival analysis EDA + preliminary analysis</h1>
+<h1 class="title">EDA and Methods</h1>
 </div>
 
 
@@ -99,7 +120,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">October 6, 2024</p>
+      <p class="date">October 13, 2024</p>
     </div>
   </div>
   
@@ -121,8 +142,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>Column names:</p>
 <table class="table">
 <colgroup>
-<col style="width: 27%">
-<col style="width: 72%">
+<col style="width: 26%">
+<col style="width: 73%">
 </colgroup>
 <tbody>
 <tr class="odd">
@@ -202,7 +223,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(survival)</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(janitor)</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(magrittr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(magrittr)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co">#print(citation("survival"), bibtex=TRUE)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <div class="cell">
@@ -731,6 +754,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell-output-display">
 <p><img src="index_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid" width="672"></p>
 </div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>colon_surv<span class="sc">%&gt;%</span><span class="fu">group_by</span>(rx)<span class="sc">%&gt;%</span><span class="fu">summarise</span>(<span class="at">t=</span> <span class="fu">median</span>(time))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 3 × 2
+  rx          t
+  &lt;fct&gt;   &lt;dbl&gt;
+1 Obs      1856
+2 Lev      1882
+3 Lev+5FU  2100</code></pre>
+</div>
 </div>
 <p><strong>Insight:</strong> The time for 50% Survival probability of the group treated with Lev+5Fu is over 3000 days while the survival time for the observation and Lev group is around 2000 days</p>
 </section>
@@ -739,13 +774,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: true</span></span>
-<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a><span class="co">#| message: false</span></span>
-<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a><span class="co">#| warning: false</span></span>
-<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Univariate analysis</span></span>
-<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a>m1 <span class="ot">&lt;-</span> <span class="fu">coxph</span>(<span class="fu">Surv</span>(time, status) <span class="sc">~</span> rx, <span class="at">data =</span> colon_surv)</span>
-<span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(m1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: true</span></span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a><span class="co">#| message: false</span></span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a><span class="co">#| warning: false</span></span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Univariate analysis</span></span>
+<span id="cb47-6"><a href="#cb47-6" aria-hidden="true" tabindex="-1"></a>m1 <span class="ot">&lt;-</span> <span class="fu">coxph</span>(<span class="fu">Surv</span>(time, status) <span class="sc">~</span> rx, <span class="at">data =</span> colon_surv)</span>
+<span id="cb47-7"><a href="#cb47-7" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(m1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Call:
@@ -773,15 +808,50 @@ Score (logrank) test = 11.68  on 2 df,   p=0.003</code></pre>
 <p>The hazard ratio for Lex+5FU (0.690), indicating the risk of death is about 31% lower compared to the observation group.</p>
 <p>The p-values indicate that the model is significant.</p>
 </section>
+<section id="test-cox-proportional-hazard-assumption" class="level3">
+<h3 class="anchored" data-anchor-id="test-cox-proportional-hazard-assumption">Test Cox proportional hazard assumption</h3>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cox.zph</span>(m1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>       chisq df    p
+rx      1.48  2 0.48
+GLOBAL  1.48  2 0.48</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Test the proportional hazards assumption</span></span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>zph_test <span class="ot">&lt;-</span> <span class="fu">cox.zph</span>(m1)</span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Print the test results</span></span>
+<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(zph_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>       chisq df    p
+rx      1.48  2 0.48
+GLOBAL  1.48  2 0.48</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the Schoenfeld residuals</span></span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(zph_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p><strong>Insight:</strong> The Schoenfeld residal plot shows that the residuals are scattered randomly and the smooth trend line is horizontal near 0. This suggests that the hazard ratio for rx (treatment status) is constant over time and the proportional hazard assumption is met. The global p-value is &gt;0.05, indicating that the the assumption is met.</p>
 <section id="perform-multivariate-analysis-including-all-variables-to-determine-which-predictors-are-significant." class="level4">
 <h4 class="anchored" data-anchor-id="perform-multivariate-analysis-including-all-variables-to-determine-which-predictors-are-significant.">Perform multivariate analysis, including all variables to determine which predictors are significant.</h4>
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="co"># multivariant analysis</span></span>
-<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>m2 <span class="ot">&lt;-</span> <span class="fu">coxph</span>(<span class="fu">Surv</span>(time, status) <span class="sc">~</span> rx<span class="sc">+</span> age <span class="sc">+</span> sex <span class="sc">+</span> surg <span class="sc">+</span> obstruct <span class="sc">+</span> differentiation <span class="sc">+</span></span>
-<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>              recurrence <span class="sc">+</span> local_spread, <span class="at">data =</span> colon_surv)</span>
-<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(m2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="co"># multivariant analysis</span></span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a>m2 <span class="ot">&lt;-</span> <span class="fu">coxph</span>(<span class="fu">Surv</span>(time, status) <span class="sc">~</span> rx<span class="sc">+</span> age <span class="sc">+</span> sex <span class="sc">+</span> surg <span class="sc">+</span> obstruct <span class="sc">+</span> differentiation <span class="sc">+</span></span>
+<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a>              recurrence <span class="sc">+</span> local_spread, <span class="at">data =</span> colon_surv)</span>
+<span id="cb54-4"><a href="#cb54-4" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(m2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Call:
@@ -825,25 +895,48 @@ Likelihood ratio test= 722  on 12 df,   p=&lt;2e-16
 Wald test            = 378.3  on 12 df,   p=&lt;2e-16
 Score (logrank) test = 708.6  on 12 df,   p=&lt;2e-16</code></pre>
 </div>
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(colon_surv)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code> [1] "id"               "study"            "rx"               "sex"             
- [5] "age"              "obstruct"         "perfor"           "adhere"          
- [9] "nodes"            "status"           "differ"           "extent"          
-[13] "surg"             "node4"            "time"             "etype"           
-[17] "death"            "recurrence"       "differentiation"  "local_spread"    
-[21] "surg_to_reg_time"</code></pre>
-</div>
 </div>
 <p><strong>Insight:</strong> When all variables are included in the model, age, obstruction, differentiation, and recurrence were significant predictor. However, treatment is no longer significant.</p>
-<p>Investigate the best set of predictors to include in the model. check multicollinearity.</p>
+</section>
+</section>
+</section>
+<section id="methods" class="level1">
+<h1>Methods</h1>
+<p>The Cox proportional hazards model was used to model the relationship between survival time and different lung cancer treatments. In particlular the survival time will be compared between the untreated group (observation) vs those treated with amisole (Lev), or amisole + 5-FU. The Cox regression model was chosen for this study because it is useful for studying association between survival time of patients and predictors and allows estimating the relative risk or hazard ratios due to the covariates, i.e., treatment status. The time (in days) until event, i.e, death, will be modeled as a function of treatment and other variables, including age, sex, and various tumor characteristics. Significant predictors were included in the final model.</p>
+<section id="statistical-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="statistical-analysis">Statistical analysis</h2>
+<p>The R statistical software version 4.3.2 <span class="citation" data-cites="R_citation"><a href="#ref-R_citation" role="doc-biblioref">[1]</a></span> was used for all analysis. The Survival package was used to consturct the Cox regression model <span class="citation" data-cites="survival-package"><a href="#ref-survival-package" role="doc-biblioref">[2]</a></span> <span class="citation" data-cites="survival-book"><a href="#ref-survival-book" role="doc-biblioref">[3]</a></span>.</p>
+<p>Cox regression model is based on the hazard function <span class="math inline">\(h_x(t)\)</span> with covariates at time t given by:</p>
+<p><span class="math inline">\(h_x(t)=h_0(t)\exp(\beta_1x_1 +\beta_2x_2 + \dots + \beta_p x_n)\)</span></p>
+<p>Where:</p>
+<p><span class="math inline">\(h_x(t)\)</span> is the hazard function</p>
+<p><span class="math inline">\(h_0(t)\)</span> is the baseline hazard function</p>
+<p><span class="math inline">\(\beta_1x_1 + \beta_2x_2 + \dots +\beta_p x_n\)</span> represent the linear combination of covariates and their coefficient</p>
+<p>The hazards for the observation vs.&nbsp;amisole (Lev), or amisole + 5-FU group with covariate values x<sub>1</sub> and x<sub>2</sub> are given by by hx<sub>1</sub>(t) = h<sub>0</sub>(t) exp(βx<sub>1</sub>) and hx<sub>2</sub>(t) = h<sub>0</sub>(t) exp(βx<sub>2</sub>) respectively</p>
+<p>The hazard ratio is expressed as: HR = hx<sub>2</sub>(t)/ hx<sub>1</sub>(t) = exp[β(x<sub>2</sub>- x<sub>1</sub>)]</p>
+<p>The Schoenfeld residual plot was constructed to test Cox proportional hazards assumption. When the proportional hazards assumpiton was not met for any of the covariates, stratification approach was explored. The Survminer <span class="citation" data-cites="survminer"><a href="#ref-survminer" role="doc-biblioref">[4]</a></span> package was used to plot the Kaplan-Meier curve to visualize the survival probability over time for each treatment group.</p>
+<p>Multicolinearity was tested using Variant Inflation Factor (VIF) calculated using MASS package <span class="citation" data-cites="MASS"><a href="#ref-MASS" role="doc-biblioref">[5]</a></span>.</p>
+
 </section>
 </section>
 
-</main>
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body" role="list">
+<div id="ref-R_citation" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[1] </div><div class="csl-right-inline">R Core Team, <em>R: A language and environment for statistical computing</em>. Vienna, Austria: R Foundation for Statistical Computing, 2023. Available: <a href="https://www.R-project.org/">https://www.R-project.org/</a></div>
+</div>
+<div id="ref-survival-package" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[2] </div><div class="csl-right-inline">T. M. Therneau, <em>A package for survival analysis in r</em>. 2024. Available: <a href="https://CRAN.R-project.org/package=survival">https://CRAN.R-project.org/package=survival</a></div>
+</div>
+<div id="ref-survival-book" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[3] </div><div class="csl-right-inline">Terry M. Therneau and Patricia M. Grambsch, <em>Modeling survival data: Extending the <span>C</span>ox model</em>. New York: Springer, 2000.</div>
+</div>
+<div id="ref-survminer" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[4] </div><div class="csl-right-inline">A. Kassambara, M. Kosinski, and P. Biecek, <em>Survminer: Drawing survival curves using ’ggplot2’</em>. 2021. Available: <a href="https://CRAN.R-project.org/package=survminer">https://CRAN.R-project.org/package=survminer</a></div>
+</div>
+<div id="ref-MASS" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[5] </div><div class="csl-right-inline">W. N. Venables and B. D. Ripley, <em>Modern applied statistics with s</em>, Fourth. New York: Springer, 2002. Available: <a href="https://www.stats.ox.ac.uk/pub/MASS4/">https://www.stats.ox.ac.uk/pub/MASS4/</a></div>
+</div>
+</div></section></div></main>
 <!-- /main column -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
