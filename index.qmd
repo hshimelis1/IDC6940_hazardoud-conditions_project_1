@@ -91,7 +91,7 @@ for recurrence event. Filter event type = 1 (recurrence), status = 0
 (not censored).
 
 ```{r}
-recurrence <- colon%>%filter(etype == 1 & status == 0)%>%select(id)
+#recurrence <- colon%>%filter(etype == 1 & status == 0)%>%select(id)
 recurrence <- recurrence%>%mutate(recurrence = 1) # list of patients with recurrence
 
 
@@ -190,8 +190,11 @@ colon_surv <- colon_surv%>%mutate(differentiation = case_when(differ == 1 ~ "wel
 **Frequency tables for categorical variables**
 
 ```{r}
+#| warning: false
+
 # frequency tables for categorical variables
 # Tumor differentiation
+
 colon_surv %>% 
   tabyl(differentiation, rx) %>%
   adorn_percentages("col") %>%
@@ -420,19 +423,16 @@ about 31% lower compared to the observation group.
 
 The p-values indicate that the model is significant.
 
-### Test Cox proportional hazard assumption
+### Test the Cox proportional hazard assumption
 
 ```{r}
 
 cox.zph(m1)
-
-# Test the proportional hazards assumption
 zph_test <- cox.zph(m1)
 
-# Print the test results
 print(zph_test)
 
-# Plot the Schoenfeld residuals
+# plot the Schoenfeld residuals
 plot(zph_test)
 
 ```
