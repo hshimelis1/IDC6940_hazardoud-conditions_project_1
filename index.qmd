@@ -31,7 +31,7 @@ The purpose of this project is to compare survival between the untreated
 Column names:
 
 |           |                                                                                   |
-|:------------------|:----------------------------------------------------|
+|:--------------------|:--------------------------------------------------|
 | id:       | id                                                                                |
 | study:    | 1 for all patients                                                                |
 | rx:       | Treatment - Obs(ervation), Lev(amisole), Lev(amisole)+5-FU                        |
@@ -91,7 +91,7 @@ for recurrence event. Filter event type = 1 (recurrence), status = 0
 (not censored).
 
 ```{r}
-#recurrence <- colon%>%filter(etype == 1 & status == 0)%>%select(id)
+recurrence <- colon%>%filter(etype == 1 & status == 0)%>%select(id)
 recurrence <- recurrence%>%mutate(recurrence = 1) # list of patients with recurrence
 
 
@@ -326,7 +326,7 @@ in the Lev+5FU group.
 The Cox proportional hazards model was used to model the relationship
 between survival time and different lung cancer treatments. In
 particlular the survival time will be compared between the untreated
-group (observation) vs those treated with amisole (Lev), or amisole +
+group (observation) vs. those treated with amisole (Lev), or amisole +
 5-FU. The Cox regression model was chosen for this study because it is
 useful for studying association between survival time of patients and
 predictors and allows estimating the relative risk or hazard ratios due
@@ -338,7 +338,7 @@ Significant predictors were included in the final model.
 ## Statistical analysis
 
 The R statistical software version 4.3.2 [@R_citation] was used for all
-analysis. The Survival package was used to consturct the Cox regression
+analysis. The Survival package was used to construct the Cox regression
 model [@survival-package] [@survival-book].
 
 Cox regression model is based on the hazard function $h_x(t)$ with
@@ -356,11 +356,12 @@ $\beta_1x_1 + \beta_2x_2 + \dots +\beta_p x_n$ represent the linear
 combination of covariates and their coefficient
 
 The hazards for the observation vs. amisole (Lev), or amisole + 5-FU
-group with covariate values x~1~ and x~2~ are given by by hx~1~(t) =
-h~0~(t) exp(βx~1~) and hx~2~(t) = h~0~(t) exp(βx~2~) respectively
+group with covariate values x~1~ and x~2~ are given by:
+$hx_1(t)=h_0(t)\exp(\beta_1x_1)$ and $hx_2(t)=h_0(t)\exp(\beta_2x_2)$,
+respectively
 
-The hazard ratio is expressed as: HR = hx~2~(t)/ hx~1~(t) = exp\[β(x~2~-
-x~1~)\]
+The hazard ratio is expressed as: HR = $hx_2(t)$ / $hx_1(t)$ =
+$\exp[\beta(x_2-x_1)]$
 
 The Schoenfeld residual plot was constructed to test Cox proportional
 hazards assumption. When the proportional hazards assumpiton was not met
