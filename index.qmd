@@ -31,7 +31,7 @@ The purpose of this project is to compare survival between the untreated
 Column names:
 
 |           |                                                                                   |
-|:--------------------|:--------------------------------------------------|
+|:-------------|:---------------------------------------------------------|
 | id:       | id                                                                                |
 | study:    | 1 for all patients                                                                |
 | rx:       | Treatment - Obs(ervation), Lev(amisole), Lev(amisole)+5-FU                        |
@@ -299,7 +299,7 @@ in the Lev+5FU group.
 </style>
 ```
 |                                             |                            | Observation (%) | Amisole (%)  | Amisole + 5-FU (%) |
-|---------------|---------------|---------------|---------------|---------------|
+|---------------------|-------------|-------------|-------------|-------------|
 |                                             |                            | N=315           | N=310        | N=304              |
 | Demographics                                |                            |                 |              |                    |
 |                                             | Male                       | 166 (52.3)      | 177 (57.1)   | 141                |
