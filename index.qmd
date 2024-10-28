@@ -31,7 +31,7 @@ The purpose of this project is to compare survival between the untreated
 Column names:
 
 |           |                                                                                   |
-|:-------------|:---------------------------------------------------------|
+|:------------------|:----------------------------------------------------|
 | id:       | id                                                                                |
 | study:    | 1 for all patients                                                                |
 | rx:       | Treatment - Obs(ervation), Lev(amisole), Lev(amisole)+5-FU                        |
@@ -60,6 +60,8 @@ library(dplyr)
 library(survival)
 library(janitor)
 library(magrittr)
+library(car)
+library(ggplot2)
 
 #print(citation("survival"), bibtex=TRUE)
 
@@ -74,24 +76,23 @@ colon <- as_tibble(colon)
 head(colon)
 ```
 
-Since the current analysis is focused on survival, create a new variable
-for recurrence time. This will create a data table with one row per
+Since the current analysis is focused on survival, filter data to death
+as the event type. This will create a data table with one row per
 individual.
 
 ```{r}
 colon_surv <- colon%>%filter(etype == 2) 
 
 # Identify participants with outome = death (not censored)
-colon_surv$death <- if_else(colon_surv$status == 1, 0, 1) 
+colon_surv$death <- if_else(colon_surv$status == 1, 1, 0) 
 
 ```
 
-Identify participants who had recurrence. Identify those not censorred
-for recurrence event. Filter event type = 1 (recurrence), status = 0
-(not censored).
+Identify participants who had recurrence. Identify those not censored
+for recurrence event. Filter event type = 1 (recurrence), status = 1.
 
 ```{r}
-recurrence <- colon%>%filter(etype == 1 & status == 0)%>%select(id)
+recurrence <- colon%>%filter(etype == 1 & status == 1)%>%select(id)
 recurrence <- recurrence%>%mutate(recurrence = 1) # list of patients with recurrence
 
 
@@ -144,6 +145,7 @@ Evaluate nodes column to investigate outliers
 ```{r}
 t <- colon_surv%>%filter(node4 ==1) # samples with more than positive lymph nodes
 hist(t$nodes) 
+
 
 ```
 
@@ -251,6 +253,12 @@ colon_surv %>%
   adorn_pct_formatting(digits = 1) %>% 
   adorn_ns()
 
+colon_surv %>% 
+  tabyl(recurrence, status) %>%
+  adorn_percentages("col") %>%
+  adorn_pct_formatting(digits = 1) %>% 
+  adorn_ns()
+
 # time from surgery to registration
 colon_surv %>% 
   tabyl(surg, rx) %>%
@@ -299,7 +307,7 @@ in the Lev+5FU group.
 </style>
 ```
 |                                             |                            | Observation (%) | Amisole (%)  | Amisole + 5-FU (%) |
-|---------------------|-------------|-------------|-------------|-------------|
+|---------------|---------------|---------------|---------------|---------------|
 |                                             |                            | N=315           | N=310        | N=304              |
 | Demographics                                |                            |                 |              |                    |
 |                                             | Male                       | 166 (52.3)      | 177 (57.1)   | 141                |
@@ -318,7 +326,7 @@ in the Lev+5FU group.
 |                                             | Serosa                     | 249 (79.0)      | 259 (83.5)   | 251 (82.6)         |
 |                                             | Submucosa                  | 8 (2.5)         | 3 (1.0)      | 10 (3.3)           |
 | More than 4 lymh nodes with cancer          | Yes                        | 87 (27.6)       | 89 (28.7)    | 79 (26.0)          |
-| Recurrence (%)                              | Yes                        | 138 (43.8)      | 138 (44.5)   | 185 (60.9)         |
+| Recurrence (%)                              | Yes                        | 177 (56.2)      | 172 (55.5)   | 119 (39.1)         |
 | Short time from surgery to registration (%) | Yes                        | 91 (28.9)       | 80 (25.8)    | 76 (25.0)          |
 
 # III. Methods
@@ -344,7 +352,7 @@ model [@survival-package] [@survival-book].
 Cox regression model is based on the hazard function $h_x(t)$ with
 covariates at time t given by:
 
-$h_x(t)=h_0(t)\exp(\beta_1x_1 +\beta_2x_2 + \dots + \beta_p x_n)$
+$h_x(t)=h_0(t)\exp(\beta_1x_1 +\beta_2x_2 + \dots + \beta_p x_p)$
 
 Where:
 
@@ -352,7 +360,7 @@ $h_x(t)$ is the hazard function
 
 $h_0(t)$ is the baseline hazard function
 
-$\beta_1x_1 + \beta_2x_2 + \dots +\beta_p x_n$ represent the linear
+$\beta_1x_1 + \beta_2x_2 + \dots +\beta_p x_p$ represent the linear
 combination of covariates and their coefficient
 
 The hazards for the observation vs. amisole (Lev), or amisole + 5-FU
@@ -375,6 +383,38 @@ calculated using MASS package [@MASS].
 
 # IV. Cox regression model
 
+#### Plot survival times
+
+```{r}
+#| echo: true
+#| message: false
+#| warning: false
+# Create new incremental count id
+colon_surv$idcount <- c(1:length(colon_surv$id))
+
+# Order by survival time and create an order variable:
+colon_surv <- colon_surv[order(-colon_surv$time, colon_surv$status),]
+colon_surv$order <- c(1:length(colon_surv$idcount))
+
+ggplot(data=colon_surv, aes(x=time, y=order)) +
+geom_rect(xmin=23,xmax=colon_surv$time,ymin=colon_surv$order,ymax=colon_surv$order+1, colour="lightgray") +
+geom_rect(xmin=colon_surv$time-2,xmax=colon_surv$time,ymin=colon_surv$order,ymax=colon_surv$order+1,
+          fill=factor(colon_surv$status+1)) +
+geom_vline(xintercept= 1976,linetype="solid") +
+scale_x_continuous(breaks=seq(20,3330,650)) +
+geom_text(aes(2600, 750, label="Median Survival Time")) +
+xlab("Survival Time (Days)") + ylab("Participants (ordered by survival time)") +
+ggtitle("Survival Times for Participant") +
+theme_classic() +
+theme(legend.position="none",
+      panel.grid.major=element_blank(),
+      panel.grid.minor=element_blank(),
+      panel.background=element_blank(),
+      axis.line.x = element_line(color = "black"),
+      axis.line.y = element_line(color = "black"))
+
+```
+
 #### Plot survival curve stratified by treatment group
 
 ```{r}
@@ -389,12 +429,18 @@ fit <- survfit(Surv(time,status) ~ rx, data = colon_surv)
 ggsurvplot(fit, data=colon_surv, risk.table = TRUE)
 
 colon_surv%>%group_by(rx)%>%summarise(t= median(time))
-
 ```
 
 **Insight:** The time for 50% Survival probability of the group treated
 with Lev+5Fu is over 3000 days while the survival time for the
 observation and Lev group is around 2000 days
+
+#### Fit base Model
+
+```{r}
+m0 <- coxph(Surv(time, status) ~ 1, data = colon_surv)
+summary(m0)
+```
 
 #### Perform cox regression to test whether treatment is significant predictor
 
@@ -407,6 +453,7 @@ observation and Lev group is around 2000 days
 # Univariate analysis
 m1 <- coxph(Surv(time, status) ~ rx, data = colon_surv)
 summary(m1)
+
 
 
 ```
@@ -452,12 +499,121 @@ p-value is \>0.05, indicating that the the assumption is met.
 #| warning: false
 
 # multivariant analysis
-m2 <- coxph(Surv(time, status) ~ rx+ age + sex + surg + obstruct + differentiation +
+m2 <- coxph(Surv(time, status) ~ rx+ age + sex + perfor + adhere + surg + obstruct + differentiation +
               recurrence + local_spread, data = colon_surv)
 summary(m2)
+
 
 ```
 
 **Insight:** When all variables are included in the model, age,
 obstruction, differentiation, and recurrence were significant predictor.
 However, treatment is no longer significant.
+
+#### Calculate Variance Inflation Factor (VIF) to assess multicollinearity among predictors
+
+```{r}
+
+vif <- vif(m2)
+print(vif)
+```
+
+**Insight:** None of the variables have VIF values above 5, therefore
+there is no multicollinearity
+
+#### Model survival while including different cancer characteristics as predictors separately to identify significance predictors.
+
+```{r}
+
+m2 <- coxph(Surv(time, status) ~ rx+ age + sex + perfor + adhere + surg + obstruct + differentiation +
+              recurrence + local_spread, data = colon_surv)
+
+# Treatment
+m2a <- coxph(Surv(time, status) ~ rx, data = colon_surv) # significant
+summary(m2a)
+
+# Demographics
+m2b <- coxph(Surv(time, status) ~ age + sex, data = colon_surv) # not significant
+summary(m2b)
+
+
+# cancer characterstics
+m2c <- coxph(Surv(time, status) ~ perfor + adhere + obstruct, data = colon_surv) # adhere and obstruct are significant
+summary(m2c)
+
+# Differentiation of tumor
+m2d <- coxph(Surv(time, status) ~ differentiation, data = colon_surv) # significant
+summary(m2d)
+
+# Extent of local spread
+m2f <- coxph(Surv(time, status) ~ local_spread, data = colon_surv) # significant
+summary(m2f)
+
+# Recurrence
+m2g <- coxph(Surv(time, status) ~ recurrence, data = colon_surv) # significant
+summary(m2g)
+
+# short time from surgery to registration
+m2h <- coxph(Surv(time, status) ~ surg, data = colon_surv) # significant
+summary(m2h)
+
+
+# include significant predictors in final model
+model <- coxph(Surv(time, status) ~ rx + adhere + surg + obstruct + differentiation + recurrence
+              + local_spread, data = colon_surv)
+
+summary(model)
+
+# remove differentiation, obstruct and recurrence bc they don't meet proportional hazards assumption
+model_2 <- coxph(Surv(time, status) ~ rx + adhere + surg + obstruct +
+                   local_spread, data = colon_surv)
+
+summary(model_2)
+
+model_3 <- coxph(Surv(time, status) ~ rx + adhere + surg + 
+                   local_spread, data = colon_surv)
+
+summary(model_3)
+```
+
+### Test proportional hazard assumption for the model with significant predictors
+
+```{R}
+cox.zph(model)
+zph_test <- cox.zph(model)
+
+print(zph_test)
+
+# plot the Schoenfeld residuals
+plot(zph_test)
+
+# test PH assumption after removing variables that did not meet assumption
+cox.zph(model_3)
+zph_test3 <- cox.zph(model_3)
+
+print(zph_test3)
+
+# plot the Schoenfeld residuals
+plot(zph_test3)
+
+```
+
+**Insight:** Differentiation and recurrence do not meet proportional
+hazards assumption.
+
+```{r}
+
+
+
+ggplot(colon_surv, aes(x=time, y=age)) +
+  geom_point(alpha =0.6) + 
+  theme_bw()
+
+ggplot(colon_surv, aes(x=time, y=rx)) +
+  geom_point(alpha =0.6) + 
+  theme_minimal()
+
+ggplot(colon_surv, aes(x=time, y=recurrence)) +
+  geom_point(alpha =0.6) + 
+  theme_minimal()
+```

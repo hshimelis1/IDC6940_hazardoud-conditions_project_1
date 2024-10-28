@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Hermela Shimelis">
-<meta name="dcterms.date" content="2024-10-20">
+<meta name="dcterms.date" content="2024-10-27">
 
 <title>EDA and Methods</title>
 <style>
@@ -120,7 +120,7 @@ div.csl-indent {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">October 20, 2024</p>
+      <p class="date">October 27, 2024</p>
     </div>
   </div>
   
@@ -142,8 +142,8 @@ div.csl-indent {
 <p>Column names:</p>
 <table class="table">
 <colgroup>
-<col style="width: 27%">
-<col style="width: 72%">
+<col style="width: 26%">
+<col style="width: 73%">
 </colgroup>
 <tbody>
 <tr class="odd">
@@ -224,8 +224,10 @@ div.csl-indent {
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(survival)</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(janitor)</span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(magrittr)</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co">#print(citation("survival"), bibtex=TRUE)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(car)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co">#print(citation("survival"), bibtex=TRUE)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <div class="cell">
@@ -249,21 +251,21 @@ div.csl-indent {
 #   etype &lt;dbl&gt;</code></pre>
 </div>
 </div>
-<p>Since the current analysis is focused on survival, create a new variable for recurrence time. This will create a data table with one row per individual.</p>
+<p>Since the current analysis is focused on survival, filter data to death as the event type. This will create a data table with one row per individual.</p>
 <div class="cell">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>colon_surv <span class="ot">&lt;-</span> colon<span class="sc">%&gt;%</span><span class="fu">filter</span>(etype <span class="sc">==</span> <span class="dv">2</span>) </span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Identify participants with outome = death (not censored)</span></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>colon_surv<span class="sc">$</span>death <span class="ot">&lt;-</span> <span class="fu">if_else</span>(colon_surv<span class="sc">$</span>status <span class="sc">==</span> <span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>colon_surv<span class="sc">$</span>death <span class="ot">&lt;-</span> <span class="fu">if_else</span>(colon_surv<span class="sc">$</span>status <span class="sc">==</span> <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">0</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<p>Identify participants who had recurrence. Identify those not censorred for recurrence event. Filter event type = 1 (recurrence), status = 0 (not censored).</p>
+<p>Identify participants who had recurrence. Identify those not censored for recurrence event. Filter event type = 1 (recurrence), status = 1.</p>
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>recurrence <span class="ot">&lt;-</span> colon<span class="sc">%&gt;%</span><span class="fu">filter</span>(etype <span class="sc">==</span> <span class="dv">1</span> <span class="sc">&amp;</span> status <span class="sc">==</span> <span class="dv">0</span>)<span class="sc">%&gt;%</span><span class="fu">select</span>(id)</span>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>recurrence <span class="ot">&lt;-</span> colon<span class="sc">%&gt;%</span><span class="fu">filter</span>(etype <span class="sc">==</span> <span class="dv">1</span> <span class="sc">&amp;</span> status <span class="sc">==</span> <span class="dv">1</span>)<span class="sc">%&gt;%</span><span class="fu">select</span>(id)</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>recurrence <span class="ot">&lt;-</span> recurrence<span class="sc">%&gt;%</span><span class="fu">mutate</span>(<span class="at">recurrence =</span> <span class="dv">1</span>) <span class="co"># list of patients with recurrence</span></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
@@ -374,7 +376,7 @@ div.csl-indent {
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>  count male median_age ct_perforation ct_adherence_nerby_organ ct_death
-1   929  484         61             27                      135      477</code></pre>
+1   929  484         61             27                      135      452</code></pre>
 </div>
 </div>
 <p><strong>Insight:</strong> Total number of participants: 929. About half of the participants are male and about half were censored, while the other half died.</p>
@@ -510,17 +512,30 @@ div.csl-indent {
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code> recurrence         Obs         Lev     Lev+5FU
-          0 56.2% (177) 55.5% (172) 39.1% (119)
-          1 43.8% (138) 44.5% (138) 60.9% (185)</code></pre>
+          0 43.8% (138) 44.5% (138) 60.9% (185)
+          1 56.2% (177) 55.5% (172) 39.1% (119)</code></pre>
 </div>
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="co"># time from surgery to registration</span></span>
-<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>colon_surv <span class="sc">%&gt;%</span> </span>
-<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tabyl</span>(surg, rx) <span class="sc">%&gt;%</span></span>
-<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">adorn_percentages</span>(<span class="st">"col"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">adorn_pct_formatting</span>(<span class="at">digits =</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">adorn_ns</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>colon_surv <span class="sc">%&gt;%</span> </span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tabyl</span>(recurrence, status) <span class="sc">%&gt;%</span></span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">adorn_percentages</span>(<span class="st">"col"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">adorn_pct_formatting</span>(<span class="at">digits =</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">adorn_ns</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code> recurrence           0           1
+          0 88.7% (423)  8.4%  (38)
+          1 11.3%  (54) 91.6% (414)</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="co"># time from surgery to registration</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>colon_surv <span class="sc">%&gt;%</span> </span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tabyl</span>(surg, rx) <span class="sc">%&gt;%</span></span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">adorn_percentages</span>(<span class="st">"col"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">adorn_pct_formatting</span>(<span class="at">digits =</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">adorn_ns</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code> surg         Obs         Lev     Lev+5FU
@@ -533,30 +548,30 @@ div.csl-indent {
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>summary_table <span class="ot">&lt;-</span> colon_surv<span class="sc">%&gt;%</span><span class="fu">group_by</span>(rx)<span class="sc">%&gt;%</span><span class="fu">summarise</span>(<span class="at">count =</span><span class="fu">n</span>(),</span>
-<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>                                                       <span class="at">male =</span> <span class="fu">sum</span>(sex),</span>
-<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>                                                       <span class="at">median_age =</span> <span class="fu">median</span>(age),</span>
-<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>                                                       <span class="at">ct_perforation =</span> <span class="fu">sum</span>(perfor),</span>
-<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>                                                       <span class="at">ct_adherence_nerby_organ =</span> <span class="fu">sum</span>(adhere),</span>
-<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>                                                       <span class="at">ct_death =</span> <span class="fu">sum</span>(death),</span>
-<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a>                                                       <span class="at">perc_male =</span> (male<span class="sc">/</span>count)<span class="sc">*</span><span class="dv">100</span>,</span>
-<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a>                                                       <span class="at">iqr_age =</span> <span class="fu">IQR</span>(age))</span>
-<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a>summary_table</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>summary_table <span class="ot">&lt;-</span> colon_surv<span class="sc">%&gt;%</span><span class="fu">group_by</span>(rx)<span class="sc">%&gt;%</span><span class="fu">summarise</span>(<span class="at">count =</span><span class="fu">n</span>(),</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>                                                       <span class="at">male =</span> <span class="fu">sum</span>(sex),</span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>                                                       <span class="at">median_age =</span> <span class="fu">median</span>(age),</span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>                                                       <span class="at">ct_perforation =</span> <span class="fu">sum</span>(perfor),</span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>                                                       <span class="at">ct_adherence_nerby_organ =</span> <span class="fu">sum</span>(adhere),</span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>                                                       <span class="at">ct_death =</span> <span class="fu">sum</span>(death),</span>
+<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a>                                                       <span class="at">perc_male =</span> (male<span class="sc">/</span>count)<span class="sc">*</span><span class="dv">100</span>,</span>
+<span id="cb42-8"><a href="#cb42-8" aria-hidden="true" tabindex="-1"></a>                                                       <span class="at">iqr_age =</span> <span class="fu">IQR</span>(age))</span>
+<span id="cb42-9"><a href="#cb42-9" aria-hidden="true" tabindex="-1"></a>summary_table</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 3 × 9
   rx      count  male median_age ct_perforation ct_adherence_nerby_or…¹ ct_death
   &lt;fct&gt;   &lt;int&gt; &lt;dbl&gt;      &lt;dbl&gt;          &lt;dbl&gt;                   &lt;dbl&gt;    &lt;dbl&gt;
-1 Obs       315   166         60              9                      47      147
-2 Lev       310   177         61             10                      49      149
-3 Lev+5FU   304   141         62              8                      39      181
+1 Obs       315   166         60              9                      47      168
+2 Lev       310   177         61             10                      49      161
+3 Lev+5FU   304   141         62              8                      39      123
 # ℹ abbreviated name: ¹​ct_adherence_nerby_organ
 # ℹ 2 more variables: perc_male &lt;dbl&gt;, iqr_age &lt;dbl&gt;</code></pre>
 </div>
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>g <span class="ot">&lt;-</span> colon_surv<span class="sc">%&gt;%</span><span class="fu">filter</span>(rx <span class="sc">==</span> <span class="st">"Lev+5FU"</span>)</span>
-<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(g<span class="sc">$</span>age)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>g <span class="ot">&lt;-</span> colon_surv<span class="sc">%&gt;%</span><span class="fu">filter</span>(rx <span class="sc">==</span> <span class="st">"Lev+5FU"</span>)</span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(g<span class="sc">$</span>age)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
@@ -725,9 +740,9 @@ div.csl-indent {
 <tr class="odd">
 <td>Recurrence (%)</td>
 <td>Yes</td>
-<td>138 (43.8)</td>
-<td>138 (44.5)</td>
-<td>185 (60.9)</td>
+<td>177 (56.2)</td>
+<td>172 (55.5)</td>
+<td>119 (39.1)</td>
 </tr>
 <tr class="even">
 <td>Short time from surgery to registration (%)</td>
@@ -741,41 +756,75 @@ div.csl-indent {
 </section>
 <section id="iii.-methods" class="level1">
 <h1>III. Methods</h1>
-<p>The Cox proportional hazards model was used to model the relationship between survival time and different lung cancer treatments. In particlular the survival time will be compared between the untreated group (observation) vs those treated with amisole (Lev), or amisole + 5-FU. The Cox regression model was chosen for this study because it is useful for studying association between survival time of patients and predictors and allows estimating the relative risk or hazard ratios due to the covariates, i.e., treatment status. The time (in days) until event, i.e, death, will be modeled as a function of treatment and other variables, including age, sex, and various tumor characteristics. Significant predictors were included in the final model.</p>
+<p>The Cox proportional hazards model was used to model the relationship between survival time and different lung cancer treatments. In particlular the survival time will be compared between the untreated group (observation) vs.&nbsp;those treated with amisole (Lev), or amisole + 5-FU. The Cox regression model was chosen for this study because it is useful for studying association between survival time of patients and predictors and allows estimating the relative risk or hazard ratios due to the covariates, i.e., treatment status. The time (in days) until event, i.e, death, will be modeled as a function of treatment and other variables, including age, sex, and various tumor characteristics. Significant predictors were included in the final model.</p>
 <section id="statistical-analysis" class="level2">
 <h2 class="anchored" data-anchor-id="statistical-analysis">Statistical analysis</h2>
-<p>The R statistical software version 4.3.2 <span class="citation" data-cites="R_citation"><a href="#ref-R_citation" role="doc-biblioref">[1]</a></span> was used for all analysis. The Survival package was used to consturct the Cox regression model <span class="citation" data-cites="survival-package"><a href="#ref-survival-package" role="doc-biblioref">[2]</a></span> <span class="citation" data-cites="survival-book"><a href="#ref-survival-book" role="doc-biblioref">[3]</a></span>.</p>
+<p>The R statistical software version 4.3.2 <span class="citation" data-cites="R_citation"><a href="#ref-R_citation" role="doc-biblioref">[1]</a></span> was used for all analysis. The Survival package was used to construct the Cox regression model <span class="citation" data-cites="survival-package"><a href="#ref-survival-package" role="doc-biblioref">[2]</a></span> <span class="citation" data-cites="survival-book"><a href="#ref-survival-book" role="doc-biblioref">[3]</a></span>.</p>
 <p>Cox regression model is based on the hazard function <span class="math inline">\(h_x(t)\)</span> with covariates at time t given by:</p>
-<p><span class="math inline">\(h_x(t)=h_0(t)\exp(\beta_1x_1 +\beta_2x_2 + \dots + \beta_p x_n)\)</span></p>
+<p><span class="math inline">\(h_x(t)=h_0(t)\exp(\beta_1x_1 +\beta_2x_2 + \dots + \beta_p x_p)\)</span></p>
 <p>Where:</p>
 <p><span class="math inline">\(h_x(t)\)</span> is the hazard function</p>
 <p><span class="math inline">\(h_0(t)\)</span> is the baseline hazard function</p>
-<p><span class="math inline">\(\beta_1x_1 + \beta_2x_2 + \dots +\beta_p x_n\)</span> represent the linear combination of covariates and their coefficient</p>
-<p>The hazards for the observation vs.&nbsp;amisole (Lev), or amisole + 5-FU group with covariate values x<sub>1</sub> and x<sub>2</sub> are given by by hx<sub>1</sub>(t) = h<sub>0</sub>(t) exp(βx<sub>1</sub>) and hx<sub>2</sub>(t) = h<sub>0</sub>(t) exp(βx<sub>2</sub>) respectively</p>
-<p>The hazard ratio is expressed as: HR = hx<sub>2</sub>(t)/ hx<sub>1</sub>(t) = exp[β(x<sub>2</sub>- x<sub>1</sub>)]</p>
+<p><span class="math inline">\(\beta_1x_1 + \beta_2x_2 + \dots +\beta_p x_p\)</span> represent the linear combination of covariates and their coefficient</p>
+<p>The hazards for the observation vs.&nbsp;amisole (Lev), or amisole + 5-FU group with covariate values x<sub>1</sub> and x<sub>2</sub> are given by: <span class="math inline">\(hx_1(t)=h_0(t)\exp(\beta_1x_1)\)</span> and <span class="math inline">\(hx_2(t)=h_0(t)\exp(\beta_2x_2)\)</span>, respectively</p>
+<p>The hazard ratio is expressed as: HR = <span class="math inline">\(hx_2(t)\)</span> / <span class="math inline">\(hx_1(t)\)</span> = <span class="math inline">\(\exp[\beta(x_2-x_1)]\)</span></p>
 <p>The Schoenfeld residual plot was constructed to test Cox proportional hazards assumption. When the proportional hazards assumpiton was not met for any of the covariates, stratification approach was explored. The Survminer <span class="citation" data-cites="survminer"><a href="#ref-survminer" role="doc-biblioref">[4]</a></span> package was used to plot the Kaplan-Meier curve to visualize the survival probability over time for each treatment group.</p>
 <p>Multicolinearity was tested using Variant Inflation Factor (VIF) calculated using MASS package <span class="citation" data-cites="MASS"><a href="#ref-MASS" role="doc-biblioref">[5]</a></span>.</p>
 </section>
 </section>
 <section id="iv.-cox-regression-model" class="level1">
 <h1>IV. Cox regression model</h1>
+<section id="plot-survival-times" class="level4">
+<h4 class="anchored" data-anchor-id="plot-survival-times">Plot survival times</h4>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create new incremental count id</span></span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>colon_surv<span class="sc">$</span>idcount <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(colon_surv<span class="sc">$</span>id))</span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Order by survival time and create an order variable:</span></span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>colon_surv <span class="ot">&lt;-</span> colon_surv[<span class="fu">order</span>(<span class="sc">-</span>colon_surv<span class="sc">$</span>time, colon_surv<span class="sc">$</span>status),]</span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a>colon_surv<span class="sc">$</span>order <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(colon_surv<span class="sc">$</span>idcount))</span>
+<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data=</span>colon_surv, <span class="fu">aes</span>(<span class="at">x=</span>time, <span class="at">y=</span>order)) <span class="sc">+</span></span>
+<span id="cb46-9"><a href="#cb46-9" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_rect</span>(<span class="at">xmin=</span><span class="dv">23</span>,<span class="at">xmax=</span>colon_surv<span class="sc">$</span>time,<span class="at">ymin=</span>colon_surv<span class="sc">$</span>order,<span class="at">ymax=</span>colon_surv<span class="sc">$</span>order<span class="sc">+</span><span class="dv">1</span>, <span class="at">colour=</span><span class="st">"lightgray"</span>) <span class="sc">+</span></span>
+<span id="cb46-10"><a href="#cb46-10" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_rect</span>(<span class="at">xmin=</span>colon_surv<span class="sc">$</span>time<span class="dv">-2</span>,<span class="at">xmax=</span>colon_surv<span class="sc">$</span>time,<span class="at">ymin=</span>colon_surv<span class="sc">$</span>order,<span class="at">ymax=</span>colon_surv<span class="sc">$</span>order<span class="sc">+</span><span class="dv">1</span>,</span>
+<span id="cb46-11"><a href="#cb46-11" aria-hidden="true" tabindex="-1"></a>          <span class="at">fill=</span><span class="fu">factor</span>(colon_surv<span class="sc">$</span>status<span class="sc">+</span><span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb46-12"><a href="#cb46-12" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_vline</span>(<span class="at">xintercept=</span> <span class="dv">1976</span>,<span class="at">linetype=</span><span class="st">"solid"</span>) <span class="sc">+</span></span>
+<span id="cb46-13"><a href="#cb46-13" aria-hidden="true" tabindex="-1"></a><span class="fu">scale_x_continuous</span>(<span class="at">breaks=</span><span class="fu">seq</span>(<span class="dv">20</span>,<span class="dv">3330</span>,<span class="dv">650</span>)) <span class="sc">+</span></span>
+<span id="cb46-14"><a href="#cb46-14" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="dv">2600</span>, <span class="dv">750</span>, <span class="at">label=</span><span class="st">"Median Survival Time"</span>)) <span class="sc">+</span></span>
+<span id="cb46-15"><a href="#cb46-15" aria-hidden="true" tabindex="-1"></a><span class="fu">xlab</span>(<span class="st">"Survival Time (Days)"</span>) <span class="sc">+</span> <span class="fu">ylab</span>(<span class="st">"Participants (ordered by survival time)"</span>) <span class="sc">+</span></span>
+<span id="cb46-16"><a href="#cb46-16" aria-hidden="true" tabindex="-1"></a><span class="fu">ggtitle</span>(<span class="st">"Survival Times for Participant"</span>) <span class="sc">+</span></span>
+<span id="cb46-17"><a href="#cb46-17" aria-hidden="true" tabindex="-1"></a><span class="fu">theme_classic</span>() <span class="sc">+</span></span>
+<span id="cb46-18"><a href="#cb46-18" aria-hidden="true" tabindex="-1"></a><span class="fu">theme</span>(<span class="at">legend.position=</span><span class="st">"none"</span>,</span>
+<span id="cb46-19"><a href="#cb46-19" aria-hidden="true" tabindex="-1"></a>      <span class="at">panel.grid.major=</span><span class="fu">element_blank</span>(),</span>
+<span id="cb46-20"><a href="#cb46-20" aria-hidden="true" tabindex="-1"></a>      <span class="at">panel.grid.minor=</span><span class="fu">element_blank</span>(),</span>
+<span id="cb46-21"><a href="#cb46-21" aria-hidden="true" tabindex="-1"></a>      <span class="at">panel.background=</span><span class="fu">element_blank</span>(),</span>
+<span id="cb46-22"><a href="#cb46-22" aria-hidden="true" tabindex="-1"></a>      <span class="at">axis.line.x =</span> <span class="fu">element_line</span>(<span class="at">color =</span> <span class="st">"black"</span>),</span>
+<span id="cb46-23"><a href="#cb46-23" aria-hidden="true" tabindex="-1"></a>      <span class="at">axis.line.y =</span> <span class="fu">element_line</span>(<span class="at">color =</span> <span class="st">"black"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
 <section id="plot-survival-curve-stratified-by-treatment-group" class="level4">
 <h4 class="anchored" data-anchor-id="plot-survival-curve-stratified-by-treatment-group">Plot survival curve stratified by treatment group</h4>
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(survminer)</span>
-<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(survival)</span>
-<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">survfit</span>(<span class="fu">Surv</span>(time,status) <span class="sc">~</span> rx, <span class="at">data =</span> colon_surv)</span>
-<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a><span class="fu">ggsurvplot</span>(fit, <span class="at">data=</span>colon_surv, <span class="at">risk.table =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(survminer)</span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(survival)</span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">survfit</span>(<span class="fu">Surv</span>(time,status) <span class="sc">~</span> rx, <span class="at">data =</span> colon_surv)</span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a><span class="fu">ggsurvplot</span>(fit, <span class="at">data=</span>colon_surv, <span class="at">risk.table =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
-<p><img src="index_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid" width="672"></p>
+<p><img src="index_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid" width="672"></p>
 </div>
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>colon_surv<span class="sc">%&gt;%</span><span class="fu">group_by</span>(rx)<span class="sc">%&gt;%</span><span class="fu">summarise</span>(<span class="at">t=</span> <span class="fu">median</span>(time))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>colon_surv<span class="sc">%&gt;%</span><span class="fu">group_by</span>(rx)<span class="sc">%&gt;%</span><span class="fu">summarise</span>(<span class="at">t=</span> <span class="fu">median</span>(time))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 3 × 2
@@ -788,18 +837,35 @@ div.csl-indent {
 </div>
 <p><strong>Insight:</strong> The time for 50% Survival probability of the group treated with Lev+5Fu is over 3000 days while the survival time for the observation and Lev group is around 2000 days</p>
 </section>
+<section id="fit-base-model" class="level4">
+<h4 class="anchored" data-anchor-id="fit-base-model">Fit base Model</h4>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>m0 <span class="ot">&lt;-</span> <span class="fu">coxph</span>(<span class="fu">Surv</span>(time, status) <span class="sc">~</span> <span class="dv">1</span>, <span class="at">data =</span> colon_surv)</span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(m0)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Call:  coxph(formula = Surv(time, status) ~ 1, data = colon_surv)
+
+Null model
+  log likelihood= -2930.192 
+  n= 929 </code></pre>
+</div>
+</div>
+</section>
 <section id="perform-cox-regression-to-test-whether-treatment-is-significant-predictor" class="level4">
 <h4 class="anchored" data-anchor-id="perform-cox-regression-to-test-whether-treatment-is-significant-predictor">Perform cox regression to test whether treatment is significant predictor</h4>
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: true</span></span>
-<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a><span class="co">#| message: false</span></span>
-<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a><span class="co">#| warning: false</span></span>
-<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Univariate analysis</span></span>
-<span id="cb47-6"><a href="#cb47-6" aria-hidden="true" tabindex="-1"></a>m1 <span class="ot">&lt;-</span> <span class="fu">coxph</span>(<span class="fu">Surv</span>(time, status) <span class="sc">~</span> rx, <span class="at">data =</span> colon_surv)</span>
-<span id="cb47-7"><a href="#cb47-7" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(m1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: true</span></span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a><span class="co">#| message: false</span></span>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a><span class="co">#| warning: false</span></span>
+<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb52-5"><a href="#cb52-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Univariate analysis</span></span>
+<span id="cb52-6"><a href="#cb52-6" aria-hidden="true" tabindex="-1"></a>m1 <span class="ot">&lt;-</span> <span class="fu">coxph</span>(<span class="fu">Surv</span>(time, status) <span class="sc">~</span> rx, <span class="at">data =</span> colon_surv)</span>
+<span id="cb52-7"><a href="#cb52-7" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(m1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Call:
@@ -832,7 +898,7 @@ Score (logrank) test = 11.68  on 2 df,   p=0.003</code></pre>
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cox.zph</span>(m1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cox.zph</span>(m1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>       chisq df    p
@@ -841,9 +907,9 @@ GLOBAL  1.48  2 0.48</code></pre>
 </div>
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>zph_test <span class="ot">&lt;-</span> <span class="fu">cox.zph</span>(m1)</span>
-<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(zph_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a>zph_test <span class="ot">&lt;-</span> <span class="fu">cox.zph</span>(m1)</span>
+<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(zph_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>       chisq df    p
@@ -852,11 +918,11 @@ GLOBAL  1.48  2 0.48</code></pre>
 </div>
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="co"># plot the Schoenfeld residuals</span></span>
-<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(zph_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="co"># plot the Schoenfeld residuals</span></span>
+<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(zph_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
-<p><img src="index_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid" width="672"></p>
+<p><img src="index_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 <p><strong>Insight:</strong> The Schoenfeld residal plot shows that the residuals are scattered randomly and the smooth trend line is horizontal near 0. This suggests that the hazard ratio for rx (treatment status) is constant over time and the proportional hazard assumption is met. The global p-value is &gt;0.05, indicating that the the assumption is met.</p>
@@ -865,57 +931,554 @@ GLOBAL  1.48  2 0.48</code></pre>
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="co"># multivariant analysis</span></span>
-<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a>m2 <span class="ot">&lt;-</span> <span class="fu">coxph</span>(<span class="fu">Surv</span>(time, status) <span class="sc">~</span> rx<span class="sc">+</span> age <span class="sc">+</span> sex <span class="sc">+</span> surg <span class="sc">+</span> obstruct <span class="sc">+</span> differentiation <span class="sc">+</span></span>
-<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a>              recurrence <span class="sc">+</span> local_spread, <span class="at">data =</span> colon_surv)</span>
-<span id="cb54-4"><a href="#cb54-4" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(m2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb59"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a><span class="co"># multivariant analysis</span></span>
+<span id="cb59-2"><a href="#cb59-2" aria-hidden="true" tabindex="-1"></a>m2 <span class="ot">&lt;-</span> <span class="fu">coxph</span>(<span class="fu">Surv</span>(time, status) <span class="sc">~</span> rx<span class="sc">+</span> age <span class="sc">+</span> sex <span class="sc">+</span> perfor <span class="sc">+</span> adhere <span class="sc">+</span> surg <span class="sc">+</span> obstruct <span class="sc">+</span> differentiation <span class="sc">+</span></span>
+<span id="cb59-3"><a href="#cb59-3" aria-hidden="true" tabindex="-1"></a>              recurrence <span class="sc">+</span> local_spread, <span class="at">data =</span> colon_surv)</span>
+<span id="cb59-4"><a href="#cb59-4" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(m2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Call:
-coxph(formula = Surv(time, status) ~ rx + age + sex + surg + 
-    obstruct + differentiation + recurrence + local_spread, data = colon_surv)
+coxph(formula = Surv(time, status) ~ rx + age + sex + perfor + 
+    adhere + surg + obstruct + differentiation + recurrence + 
+    local_spread, data = colon_surv)
 
   n= 929, number of events= 452 
 
-                           coef exp(coef)  se(coef)       z Pr(&gt;|z|)    
-rxLev                  0.052957  1.054384  0.111281   0.476   0.6342    
-rxLev+5FU              0.102881  1.108359  0.121206   0.849   0.3960    
-age                    0.009472  1.009517  0.003925   2.413   0.0158 *  
-sex                   -0.013488  0.986603  0.095977  -0.141   0.8882    
-surg                   0.016657  1.016797  0.104386   0.160   0.8732    
-obstruct               0.234640  1.264453  0.116481   2.014   0.0440 *  
-differentiationpoor    0.593681  1.810641  0.122636   4.841 1.29e-06 ***
-differentiationwell    0.184424  1.202526  0.168128   1.097   0.2727    
-recurrence            -3.209288  0.040385  0.173871 -18.458  &lt; 2e-16 ***
-local_spreadmuscle    -0.464787  0.628269  0.254157  -1.829   0.0674 .  
-local_spreadserosa    -0.214098  0.807270  0.196383  -1.090   0.2756    
-local_spreadsubmucosa -0.965490  0.380797  0.546550  -1.767   0.0773 .  
+                           coef exp(coef)  se(coef)      z Pr(&gt;|z|)    
+rxLev                  0.052982  1.054411  0.111849  0.474   0.6357    
+rxLev+5FU              0.102226  1.107634  0.121122  0.844   0.3987    
+age                    0.009438  1.009483  0.003925  2.404   0.0162 *  
+sex                   -0.016083  0.984046  0.096234 -0.167   0.8673    
+perfor                -0.251238  0.777837  0.267861 -0.938   0.3483    
+adhere                 0.017799  1.017959  0.127986  0.139   0.8894    
+surg                   0.021484  1.021717  0.104592  0.205   0.8373    
+obstruct               0.251033  1.285352  0.117788  2.131   0.0331 *  
+differentiationpoor    0.588131  1.800620  0.122921  4.785 1.71e-06 ***
+differentiationwell    0.189911  1.209143  0.168115  1.130   0.2586    
+recurrence             3.211414 24.814142  0.173946 18.462  &lt; 2e-16 ***
+local_spreadmuscle    -0.468388  0.626010  0.255028 -1.837   0.0663 .  
+local_spreadserosa    -0.212137  0.808854  0.198560 -1.068   0.2854    
+local_spreadsubmucosa -0.972583  0.378105  0.548750 -1.772   0.0763 .  
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
                       exp(coef) exp(-coef) lower .95 upper .95
-rxLev                   1.05438     0.9484   0.84777   1.31136
-rxLev+5FU               1.10836     0.9022   0.87400   1.40557
-age                     1.00952     0.9906   1.00178   1.01731
-sex                     0.98660     1.0136   0.81742   1.19080
-surg                    1.01680     0.9835   0.82867   1.24764
-obstruct                1.26445     0.7909   1.00636   1.58873
-differentiationpoor     1.81064     0.5523   1.42378   2.30261
-differentiationwell     1.20253     0.8316   0.86494   1.67188
-recurrence              0.04039    24.7615   0.02872   0.05678
-local_spreadmuscle      0.62827     1.5917   0.38177   1.03391
-local_spreadserosa      0.80727     1.2387   0.54936   1.18626
-local_spreadsubmucosa   0.38080     2.6261   0.13046   1.11152
+rxLev                    1.0544     0.9484    0.8468     1.313
+rxLev+5FU                1.1076     0.9028    0.8736     1.404
+age                      1.0095     0.9906    1.0017     1.017
+sex                      0.9840     1.0162    0.8149     1.188
+perfor                   0.7778     1.2856    0.4601     1.315
+adhere                   1.0180     0.9824    0.7921     1.308
+surg                     1.0217     0.9787    0.8323     1.254
+obstruct                 1.2854     0.7780    1.0204     1.619
+differentiationpoor      1.8006     0.5554    1.4151     2.291
+differentiationwell      1.2091     0.8270    0.8697     1.681
+recurrence              24.8141     0.0403   17.6456    34.895
+local_spreadmuscle       0.6260     1.5974    0.3798     1.032
+local_spreadserosa       0.8089     1.2363    0.5481     1.194
+local_spreadsubmucosa    0.3781     2.6448    0.1290     1.108
 
-Concordance= 0.817  (se = 0.009 )
-Likelihood ratio test= 722  on 12 df,   p=&lt;2e-16
-Wald test            = 378.3  on 12 df,   p=&lt;2e-16
-Score (logrank) test = 708.6  on 12 df,   p=&lt;2e-16</code></pre>
+Concordance= 0.818  (se = 0.009 )
+Likelihood ratio test= 723  on 14 df,   p=&lt;2e-16
+Wald test            = 379.5  on 14 df,   p=&lt;2e-16
+Score (logrank) test = 710.1  on 14 df,   p=&lt;2e-16</code></pre>
 </div>
 </div>
 <p><strong>Insight:</strong> When all variables are included in the model, age, obstruction, differentiation, and recurrence were significant predictor. However, treatment is no longer significant.</p>
-
 </section>
+<section id="calculate-variance-inflation-factor-vif-to-assess-multicollinearity-among-predictors" class="level4">
+<h4 class="anchored" data-anchor-id="calculate-variance-inflation-factor-vif-to-assess-multicollinearity-among-predictors">Calculate Variance Inflation Factor (VIF) to assess multicollinearity among predictors</h4>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb61"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a>vif <span class="ot">&lt;-</span> <span class="fu">vif</span>(m2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in vif.default(m2): No intercept: vifs may not be sensible.</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb63"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(vif)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>                    GVIF Df GVIF^(1/(2*Df))
+rx              1.085172  2        1.020645
+age             1.019323  1        1.009615
+sex             1.042176  1        1.020870
+perfor          1.038892  1        1.019261
+adhere          1.066401  1        1.032667
+surg            1.038474  1        1.019055
+obstruct        1.054506  1        1.026891
+differentiation 1.080009  2        1.019429
+recurrence      1.022070  1        1.010975
+local_spread    1.128818  3        1.020400</code></pre>
+</div>
+</div>
+<p><strong>Insight:</strong> None of the variables have VIF values above 5, therefore there is no multicollinearity</p>
+</section>
+<section id="model-survival-while-including-different-cancer-characteristics-as-predictors-separately-to-identify-significance-predictors." class="level4">
+<h4 class="anchored" data-anchor-id="model-survival-while-including-different-cancer-characteristics-as-predictors-separately-to-identify-significance-predictors.">Model survival while including different cancer characteristics as predictors separately to identify significance predictors.</h4>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb65"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a>m2 <span class="ot">&lt;-</span> <span class="fu">coxph</span>(<span class="fu">Surv</span>(time, status) <span class="sc">~</span> rx<span class="sc">+</span> age <span class="sc">+</span> sex <span class="sc">+</span> perfor <span class="sc">+</span> adhere <span class="sc">+</span> surg <span class="sc">+</span> obstruct <span class="sc">+</span> differentiation <span class="sc">+</span></span>
+<span id="cb65-2"><a href="#cb65-2" aria-hidden="true" tabindex="-1"></a>              recurrence <span class="sc">+</span> local_spread, <span class="at">data =</span> colon_surv)</span>
+<span id="cb65-3"><a href="#cb65-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb65-4"><a href="#cb65-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Treatment</span></span>
+<span id="cb65-5"><a href="#cb65-5" aria-hidden="true" tabindex="-1"></a>m2a <span class="ot">&lt;-</span> <span class="fu">coxph</span>(<span class="fu">Surv</span>(time, status) <span class="sc">~</span> rx, <span class="at">data =</span> colon_surv) <span class="co"># significant</span></span>
+<span id="cb65-6"><a href="#cb65-6" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(m2a)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Call:
+coxph(formula = Surv(time, status) ~ rx, data = colon_surv)
+
+  n= 929, number of events= 452 
+
+              coef exp(coef) se(coef)      z Pr(&gt;|z|)   
+rxLev     -0.02664   0.97371  0.11030 -0.241  0.80917   
+rxLev+5FU -0.37171   0.68955  0.11875 -3.130  0.00175 **
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+          exp(coef) exp(-coef) lower .95 upper .95
+rxLev        0.9737      1.027    0.7844    1.2087
+rxLev+5FU    0.6896      1.450    0.5464    0.8703
+
+Concordance= 0.536  (se = 0.013 )
+Likelihood ratio test= 12.15  on 2 df,   p=0.002
+Wald test            = 11.56  on 2 df,   p=0.003
+Score (logrank) test = 11.68  on 2 df,   p=0.003</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb67"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Demographics</span></span>
+<span id="cb67-2"><a href="#cb67-2" aria-hidden="true" tabindex="-1"></a>m2b <span class="ot">&lt;-</span> <span class="fu">coxph</span>(<span class="fu">Surv</span>(time, status) <span class="sc">~</span> age <span class="sc">+</span> sex, <span class="at">data =</span> colon_surv) <span class="co"># not significant</span></span>
+<span id="cb67-3"><a href="#cb67-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(m2b)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Call:
+coxph(formula = Surv(time, status) ~ age + sex, data = colon_surv)
+
+  n= 929, number of events= 452 
+
+        coef exp(coef) se(coef)     z Pr(&gt;|z|)
+age 0.001951  1.001952 0.004031 0.484    0.628
+sex 0.012955  1.013040 0.094205 0.138    0.891
+
+    exp(coef) exp(-coef) lower .95 upper .95
+age     1.002     0.9981    0.9941     1.010
+sex     1.013     0.9871    0.8422     1.218
+
+Concordance= 0.511  (se = 0.014 )
+Likelihood ratio test= 0.26  on 2 df,   p=0.9
+Wald test            = 0.25  on 2 df,   p=0.9
+Score (logrank) test = 0.25  on 2 df,   p=0.9</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb69"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a><span class="co"># cancer characterstics</span></span>
+<span id="cb69-2"><a href="#cb69-2" aria-hidden="true" tabindex="-1"></a>m2c <span class="ot">&lt;-</span> <span class="fu">coxph</span>(<span class="fu">Surv</span>(time, status) <span class="sc">~</span> perfor <span class="sc">+</span> adhere <span class="sc">+</span> obstruct, <span class="at">data =</span> colon_surv) <span class="co"># adhere and obstruct are significant</span></span>
+<span id="cb69-3"><a href="#cb69-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(m2c)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Call:
+coxph(formula = Surv(time, status) ~ perfor + adhere + obstruct, 
+    data = colon_surv)
+
+  n= 929, number of events= 452 
+
+             coef exp(coef) se(coef)      z Pr(&gt;|z|)  
+perfor   -0.03415   0.96643  0.26932 -0.127   0.8991  
+adhere    0.31011   1.36358  0.12572  2.467   0.0136 *
+obstruct  0.25794   1.29426  0.11547  2.234   0.0255 *
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+         exp(coef) exp(-coef) lower .95 upper .95
+perfor      0.9664     1.0347    0.5701     1.638
+adhere      1.3636     0.7334    1.0658     1.745
+obstruct    1.2943     0.7726    1.0321     1.623
+
+Concordance= 0.536  (se = 0.012 )
+Likelihood ratio test= 10.82  on 3 df,   p=0.01
+Wald test            = 11.51  on 3 df,   p=0.009
+Score (logrank) test = 11.6  on 3 df,   p=0.009</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb71"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb71-1"><a href="#cb71-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Differentiation of tumor</span></span>
+<span id="cb71-2"><a href="#cb71-2" aria-hidden="true" tabindex="-1"></a>m2d <span class="ot">&lt;-</span> <span class="fu">coxph</span>(<span class="fu">Surv</span>(time, status) <span class="sc">~</span> differentiation, <span class="at">data =</span> colon_surv) <span class="co"># significant</span></span>
+<span id="cb71-3"><a href="#cb71-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(m2d)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Call:
+coxph(formula = Surv(time, status) ~ differentiation, data = colon_surv)
+
+  n= 929, number of events= 452 
+
+                        coef exp(coef) se(coef)      z Pr(&gt;|z|)    
+differentiationpoor  0.48265   1.62036  0.12040  4.009  6.1e-05 ***
+differentiationwell -0.05027   0.95097  0.16408 -0.306    0.759    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+                    exp(coef) exp(-coef) lower .95 upper .95
+differentiationpoor     1.620     0.6171    1.2798     2.052
+differentiationwell     0.951     1.0516    0.6895     1.312
+
+Concordance= 0.544  (se = 0.012 )
+Likelihood ratio test= 15.34  on 2 df,   p=5e-04
+Wald test            = 16.97  on 2 df,   p=2e-04
+Score (logrank) test = 17.31  on 2 df,   p=2e-04</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb73"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb73-1"><a href="#cb73-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Extent of local spread</span></span>
+<span id="cb73-2"><a href="#cb73-2" aria-hidden="true" tabindex="-1"></a>m2f <span class="ot">&lt;-</span> <span class="fu">coxph</span>(<span class="fu">Surv</span>(time, status) <span class="sc">~</span> local_spread, <span class="at">data =</span> colon_surv) <span class="co"># significant</span></span>
+<span id="cb73-3"><a href="#cb73-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(m2f)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Call:
+coxph(formula = Surv(time, status) ~ local_spread, data = colon_surv)
+
+  n= 929, number of events= 452 
+
+                         coef exp(coef) se(coef)      z Pr(&gt;|z|)    
+local_spreadmuscle    -1.0892    0.3365   0.2498 -4.361 1.29e-05 ***
+local_spreadserosa    -0.5043    0.6039   0.1927 -2.617  0.00888 ** 
+local_spreadsubmucosa -1.7283    0.1776   0.5336 -3.239  0.00120 ** 
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+                      exp(coef) exp(-coef) lower .95 upper .95
+local_spreadmuscle       0.3365      2.972    0.2062    0.5490
+local_spreadserosa       0.6039      1.656    0.4139    0.8811
+local_spreadsubmucosa    0.1776      5.631    0.0624    0.5054
+
+Concordance= 0.552  (se = 0.009 )
+Likelihood ratio test= 29.21  on 3 df,   p=2e-06
+Wald test            = 25.35  on 3 df,   p=1e-05
+Score (logrank) test = 26.94  on 3 df,   p=6e-06</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb75"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb75-1"><a href="#cb75-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Recurrence</span></span>
+<span id="cb75-2"><a href="#cb75-2" aria-hidden="true" tabindex="-1"></a>m2g <span class="ot">&lt;-</span> <span class="fu">coxph</span>(<span class="fu">Surv</span>(time, status) <span class="sc">~</span> recurrence, <span class="at">data =</span> colon_surv) <span class="co"># significant</span></span>
+<span id="cb75-3"><a href="#cb75-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(m2g)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Call:
+coxph(formula = Surv(time, status) ~ recurrence, data = colon_surv)
+
+  n= 929, number of events= 452 
+
+              coef exp(coef) se(coef)     z Pr(&gt;|z|)    
+recurrence  3.1848   24.1616   0.1718 18.54   &lt;2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+           exp(coef) exp(-coef) lower .95 upper .95
+recurrence     24.16    0.04139     17.25     33.83
+
+Concordance= 0.776  (se = 0.009 )
+Likelihood ratio test= 685.8  on 1 df,   p=&lt;2e-16
+Wald test            = 343.6  on 1 df,   p=&lt;2e-16
+Score (logrank) test = 677.5  on 1 df,   p=&lt;2e-16</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb77"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb77-1"><a href="#cb77-1" aria-hidden="true" tabindex="-1"></a><span class="co"># short time from surgery to registration</span></span>
+<span id="cb77-2"><a href="#cb77-2" aria-hidden="true" tabindex="-1"></a>m2h <span class="ot">&lt;-</span> <span class="fu">coxph</span>(<span class="fu">Surv</span>(time, status) <span class="sc">~</span> surg, <span class="at">data =</span> colon_surv) <span class="co"># significant</span></span>
+<span id="cb77-3"><a href="#cb77-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(m2h)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Call:
+coxph(formula = Surv(time, status) ~ surg, data = colon_surv)
+
+  n= 929, number of events= 452 
+
+       coef exp(coef) se(coef)     z Pr(&gt;|z|)  
+surg 0.2333    1.2627   0.1026 2.274   0.0229 *
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+     exp(coef) exp(-coef) lower .95 upper .95
+surg     1.263     0.7919     1.033     1.544
+
+Concordance= 0.523  (se = 0.011 )
+Likelihood ratio test= 5.01  on 1 df,   p=0.03
+Wald test            = 5.17  on 1 df,   p=0.02
+Score (logrank) test = 5.2  on 1 df,   p=0.02</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb79"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb79-1"><a href="#cb79-1" aria-hidden="true" tabindex="-1"></a><span class="co"># include significant predictors in final model</span></span>
+<span id="cb79-2"><a href="#cb79-2" aria-hidden="true" tabindex="-1"></a>model <span class="ot">&lt;-</span> <span class="fu">coxph</span>(<span class="fu">Surv</span>(time, status) <span class="sc">~</span> rx <span class="sc">+</span> adhere <span class="sc">+</span> surg <span class="sc">+</span> obstruct <span class="sc">+</span> differentiation <span class="sc">+</span> recurrence</span>
+<span id="cb79-3"><a href="#cb79-3" aria-hidden="true" tabindex="-1"></a>              <span class="sc">+</span> local_spread, <span class="at">data =</span> colon_surv)</span>
+<span id="cb79-4"><a href="#cb79-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb79-5"><a href="#cb79-5" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(model)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Call:
+coxph(formula = Surv(time, status) ~ rx + adhere + surg + obstruct + 
+    differentiation + recurrence + local_spread, data = colon_surv)
+
+  n= 929, number of events= 452 
+
+                          coef exp(coef) se(coef)      z Pr(&gt;|z|)    
+rxLev                  0.04742   1.04856  0.11188  0.424   0.6717    
+rxLev+5FU              0.09927   1.10437  0.12032  0.825   0.4093    
+adhere                 0.01999   1.02019  0.12691  0.157   0.8749    
+surg                   0.01440   1.01451  0.10430  0.138   0.8902    
+obstruct               0.20524   1.22782  0.11602  1.769   0.0769 .  
+differentiationpoor    0.57709   1.78085  0.12261  4.707 2.52e-06 ***
+differentiationwell    0.20259   1.22457  0.16776  1.208   0.2272    
+recurrence             3.19167  24.32900  0.17376 18.368  &lt; 2e-16 ***
+local_spreadmuscle    -0.46121   0.63052  0.25465 -1.811   0.0701 .  
+local_spreadserosa    -0.20267   0.81655  0.19897 -1.019   0.3084    
+local_spreadsubmucosa -0.98866   0.37207  0.54796 -1.804   0.0712 .  
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+                      exp(coef) exp(-coef) lower .95 upper .95
+rxLev                    1.0486     0.9537    0.8421     1.306
+rxLev+5FU                1.1044     0.9055    0.8724     1.398
+adhere                   1.0202     0.9802    0.7955     1.308
+surg                     1.0145     0.9857    0.8269     1.245
+obstruct                 1.2278     0.8145    0.9781     1.541
+differentiationpoor      1.7808     0.5615    1.4004     2.265
+differentiationwell      1.2246     0.8166    0.8814     1.701
+recurrence              24.3290     0.0411   17.3069    34.200
+local_spreadmuscle       0.6305     1.5860    0.3828     1.039
+local_spreadserosa       0.8165     1.2247    0.5529     1.206
+local_spreadsubmucosa    0.3721     2.6876    0.1271     1.089
+
+Concordance= 0.81  (se = 0.01 )
+Likelihood ratio test= 716.1  on 11 df,   p=&lt;2e-16
+Wald test            = 372.2  on 11 df,   p=&lt;2e-16
+Score (logrank) test = 703.2  on 11 df,   p=&lt;2e-16</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb81"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb81-1"><a href="#cb81-1" aria-hidden="true" tabindex="-1"></a><span class="co"># remove differentiation, obstruct and recurrence bc they don't meet proportional hazards assumption</span></span>
+<span id="cb81-2"><a href="#cb81-2" aria-hidden="true" tabindex="-1"></a>model_2 <span class="ot">&lt;-</span> <span class="fu">coxph</span>(<span class="fu">Surv</span>(time, status) <span class="sc">~</span> rx <span class="sc">+</span> adhere <span class="sc">+</span> surg <span class="sc">+</span> obstruct <span class="sc">+</span></span>
+<span id="cb81-3"><a href="#cb81-3" aria-hidden="true" tabindex="-1"></a>                   local_spread, <span class="at">data =</span> colon_surv)</span>
+<span id="cb81-4"><a href="#cb81-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb81-5"><a href="#cb81-5" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(model_2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Call:
+coxph(formula = Surv(time, status) ~ rx + adhere + surg + obstruct + 
+    local_spread, data = colon_surv)
+
+  n= 929, number of events= 452 
+
+                          coef exp(coef) se(coef)      z Pr(&gt;|z|)    
+rxLev                 -0.01497   0.98515  0.11079 -0.135  0.89255    
+rxLev+5FU             -0.34546   0.70789  0.11907 -2.901  0.00372 ** 
+adhere                 0.20425   1.22660  0.12730  1.604  0.10862    
+surg                   0.22259   1.24931  0.10301  2.161  0.03070 *  
+obstruct               0.19636   1.21696  0.11482  1.710  0.08723 .  
+local_spreadmuscle    -1.02263   0.35965  0.25443 -4.019 5.84e-05 ***
+local_spreadserosa    -0.44744   0.63926  0.19841 -2.255  0.02412 *  
+local_spreadsubmucosa -1.53969   0.21445  0.53770 -2.863  0.00419 ** 
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+                      exp(coef) exp(-coef) lower .95 upper .95
+rxLev                    0.9851     1.0151   0.79286    1.2241
+rxLev+5FU                0.7079     1.4126   0.56055    0.8940
+adhere                   1.2266     0.8153   0.95575    1.5742
+surg                     1.2493     0.8004   1.02092    1.5288
+obstruct                 1.2170     0.8217   0.97173    1.5241
+local_spreadmuscle       0.3596     2.7805   0.21843    0.5922
+local_spreadserosa       0.6393     1.5643   0.43331    0.9431
+local_spreadsubmucosa    0.2144     4.6631   0.07475    0.6152
+
+Concordance= 0.593  (se = 0.013 )
+Likelihood ratio test= 50.81  on 8 df,   p=3e-08
+Wald test            = 46.58  on 8 df,   p=2e-07
+Score (logrank) test = 48.48  on 8 df,   p=8e-08</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb83"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb83-1"><a href="#cb83-1" aria-hidden="true" tabindex="-1"></a>model_3 <span class="ot">&lt;-</span> <span class="fu">coxph</span>(<span class="fu">Surv</span>(time, status) <span class="sc">~</span> rx <span class="sc">+</span> adhere <span class="sc">+</span> surg <span class="sc">+</span> </span>
+<span id="cb83-2"><a href="#cb83-2" aria-hidden="true" tabindex="-1"></a>                   local_spread, <span class="at">data =</span> colon_surv)</span>
+<span id="cb83-3"><a href="#cb83-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb83-4"><a href="#cb83-4" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(model_3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Call:
+coxph(formula = Surv(time, status) ~ rx + adhere + surg + local_spread, 
+    data = colon_surv)
+
+  n= 929, number of events= 452 
+
+                          coef exp(coef) se(coef)      z Pr(&gt;|z|)    
+rxLev                 -0.01804   0.98213  0.11081 -0.163   0.8707    
+rxLev+5FU             -0.35316   0.70246  0.11900 -2.968   0.0030 ** 
+adhere                 0.20513   1.22768  0.12748  1.609   0.1076    
+surg                   0.22355   1.25050  0.10304  2.169   0.0300 *  
+local_spreadmuscle    -1.03034   0.35689  0.25477 -4.044 5.25e-05 ***
+local_spreadserosa    -0.43355   0.64820  0.19850 -2.184   0.0289 *  
+local_spreadsubmucosa -1.56504   0.20908  0.53755 -2.911   0.0036 ** 
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+                      exp(coef) exp(-coef) lower .95 upper .95
+rxLev                    0.9821     1.0182    0.7904    1.2204
+rxLev+5FU                0.7025     1.4236    0.5563    0.8870
+adhere                   1.2277     0.8145    0.9563    1.5762
+surg                     1.2505     0.7997    1.0218    1.5304
+local_spreadmuscle       0.3569     2.8020    0.2166    0.5880
+local_spreadserosa       0.6482     1.5427    0.4393    0.9565
+local_spreadsubmucosa    0.2091     4.7829    0.0729    0.5996
+
+Concordance= 0.589  (se = 0.013 )
+Likelihood ratio test= 47.99  on 7 df,   p=4e-08
+Wald test            = 43.6  on 7 df,   p=3e-07
+Score (logrank) test = 45.4  on 7 df,   p=1e-07</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="test-proportional-hazard-assumption-for-the-model-with-significant-predictors" class="level3">
+<h3 class="anchored" data-anchor-id="test-proportional-hazard-assumption-for-the-model-with-significant-predictors">Test proportional hazard assumption for the model with significant predictors</h3>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb85"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb85-1"><a href="#cb85-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cox.zph</span>(model)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>                  chisq df      p
+rx               0.4291  2 0.8069
+adhere           0.0606  1 0.8056
+surg             0.6611  1 0.4162
+obstruct         6.7292  1 0.0095
+differentiation 11.0570  2 0.0040
+recurrence       2.3977  1 0.1215
+local_spread     6.6228  3 0.0849
+GLOBAL          30.8336 11 0.0012</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb87"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb87-1"><a href="#cb87-1" aria-hidden="true" tabindex="-1"></a>zph_test <span class="ot">&lt;-</span> <span class="fu">cox.zph</span>(model)</span>
+<span id="cb87-2"><a href="#cb87-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb87-3"><a href="#cb87-3" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(zph_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>                  chisq df      p
+rx               0.4291  2 0.8069
+adhere           0.0606  1 0.8056
+surg             0.6611  1 0.4162
+obstruct         6.7292  1 0.0095
+differentiation 11.0570  2 0.0040
+recurrence       2.3977  1 0.1215
+local_spread     6.6228  3 0.0849
+GLOBAL          30.8336 11 0.0012</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb89"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb89-1"><a href="#cb89-1" aria-hidden="true" tabindex="-1"></a><span class="co"># plot the Schoenfeld residuals</span></span>
+<span id="cb89-2"><a href="#cb89-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(zph_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-19-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-19-2.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-19-3.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-19-4.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-19-5.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-19-6.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-19-7.png" class="img-fluid" width="672"></p>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb90"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb90-1"><a href="#cb90-1" aria-hidden="true" tabindex="-1"></a><span class="co"># test PH assumption after removing variables that did not meet assumption</span></span>
+<span id="cb90-2"><a href="#cb90-2" aria-hidden="true" tabindex="-1"></a><span class="fu">cox.zph</span>(model_3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>              chisq df     p
+rx           1.6081  2 0.448
+adhere       0.2200  1 0.639
+surg         0.0582  1 0.809
+local_spread 6.7271  3 0.081
+GLOBAL       8.9834  7 0.254</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb92"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb92-1"><a href="#cb92-1" aria-hidden="true" tabindex="-1"></a>zph_test3 <span class="ot">&lt;-</span> <span class="fu">cox.zph</span>(model_3)</span>
+<span id="cb92-2"><a href="#cb92-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb92-3"><a href="#cb92-3" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(zph_test3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>              chisq df     p
+rx           1.6081  2 0.448
+adhere       0.2200  1 0.639
+surg         0.0582  1 0.809
+local_spread 6.7271  3 0.081
+GLOBAL       8.9834  7 0.254</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb94"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb94-1"><a href="#cb94-1" aria-hidden="true" tabindex="-1"></a><span class="co"># plot the Schoenfeld residuals</span></span>
+<span id="cb94-2"><a href="#cb94-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(zph_test3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-19-8.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-19-9.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-19-10.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-19-11.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p><strong>Insight:</strong> Differentiation and recurrence do not meet proportional hazards assumption.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb95"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb95-1"><a href="#cb95-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(colon_surv, <span class="fu">aes</span>(<span class="at">x=</span>time, <span class="at">y=</span>age)) <span class="sc">+</span></span>
+<span id="cb95-2"><a href="#cb95-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span><span class="fl">0.6</span>) <span class="sc">+</span> </span>
+<span id="cb95-3"><a href="#cb95-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-20-1.png" class="img-fluid" width="672"></p>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb96"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb96-1"><a href="#cb96-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(colon_surv, <span class="fu">aes</span>(<span class="at">x=</span>time, <span class="at">y=</span>rx)) <span class="sc">+</span></span>
+<span id="cb96-2"><a href="#cb96-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span><span class="fl">0.6</span>) <span class="sc">+</span> </span>
+<span id="cb96-3"><a href="#cb96-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-20-2.png" class="img-fluid" width="672"></p>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb97"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb97-1"><a href="#cb97-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(colon_surv, <span class="fu">aes</span>(<span class="at">x=</span>time, <span class="at">y=</span>recurrence)) <span class="sc">+</span></span>
+<span id="cb97-2"><a href="#cb97-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span><span class="fl">0.6</span>) <span class="sc">+</span> </span>
+<span id="cb97-3"><a href="#cb97-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-20-3.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+
 </section>
 </section>
 
