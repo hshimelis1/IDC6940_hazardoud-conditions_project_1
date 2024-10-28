@@ -570,10 +570,7 @@ model_2 <- coxph(Surv(time, status) ~ rx + adhere + surg + obstruct +
 
 summary(model_2)
 
-model_3 <- coxph(Surv(time, status) ~ rx + adhere + surg + 
-                   local_spread, data = colon_surv)
 
-summary(model_3)
 ```
 
 ### Test proportional hazard assumption for the model with significant predictors
