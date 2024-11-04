@@ -1,5 +1,5 @@
 ---
-title: "EDA and Methods"
+title: "Cox regression modeling of survival"
 author: "Hermela Shimelis"
 date: today
 format:
