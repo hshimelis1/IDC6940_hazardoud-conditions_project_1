@@ -7,10 +7,15 @@ format:
     code-fold: true
     css: custom.css
 bibliography: references.bib # file contains bibtex for references
+#always_allow_html: true # this allows to get PDF with HTML features
 csl: ieee.csl
+self-contained: true
+execute: 
+  warning: false
+  message: false
 editor: 
   markdown: 
-    wrap: 72
+    wrap: 72    
 ---
 
 ## Data: Survival after chemotherapy for Stage B/C colon cancer
@@ -30,25 +35,47 @@ The purpose of this project is to compare survival between the untreated
 
 Column names:
 
-|           |                                                                                   |
-|:------------------|:----------------------------------------------------|
-| id:       | id                                                                                |
-| study:    | 1 for all patients                                                                |
-| rx:       | Treatment - Obs(ervation), Lev(amisole), Lev(amisole)+5-FU                        |
-| sex:      | 1=male                                                                            |
-| age:      | in years                                                                          |
-| obstruct: | obstruction of colon by tumour                                                    |
-| perfor:   | perforation of colon                                                              |
-| adhere:   | adherence to nearby organs                                                        |
-| nodes:    | number of lymph nodes with detectable cancer                                      |
-| time:     | days until event or censoring                                                     |
-| status:   | censoring status                                                                  |
-| differ:   | differentiation of tumour (1=well, 2=moderate, 3=poor)                            |
-| extent:   | Extent of local spread (1=submucosa, 2=muscle, 3=serosa, 4=contiguous structures) |
-| surg:     | time from surgery to registration (0=short, 1=long)                               |
-| node4:    | more than 4 positive lymph nodes                                                  |
-| etype:    | event type: 1=recurrence,2=death                                                  |
-|           |                                                                                   |
++:----------------------+:------------------------------------------+
+| id:                   | id                                        |
++-----------------------+-------------------------------------------+
+| study:                | 1 for all patients                        |
++-----------------------+-------------------------------------------+
+| rx:                   | Treatment - Obs(ervation), Lev(amisole),  |
+|                       | Lev(amisole)+5-FU                         |
++-----------------------+-------------------------------------------+
+| sex:                  | 1=male                                    |
++-----------------------+-------------------------------------------+
+| age:                  | in years                                  |
++-----------------------+-------------------------------------------+
+| obstruct:             | obstruction of colon by tumour            |
++-----------------------+-------------------------------------------+
+| perfor:               | perforation of colon                      |
++-----------------------+-------------------------------------------+
+| adhere:               | adherence to nearby organs                |
++-----------------------+-------------------------------------------+
+| nodes:                | number of lymph nodes with detectable     |
+|                       | cancer                                    |
++-----------------------+-------------------------------------------+
+| time:                 | days until event or censoring             |
++-----------------------+-------------------------------------------+
+| status:               | censoring status                          |
++-----------------------+-------------------------------------------+
+| differ:               | differentiation of tumour (1=well,        |
+|                       | 2=moderate, 3=poor)                       |
++-----------------------+-------------------------------------------+
+| extent:               | Extent of local spread (1=submucosa,      |
+|                       | 2=muscle, 3=serosa, 4=contiguous          |
+|                       | structures)                               |
++-----------------------+-------------------------------------------+
+| surg:                 | time from surgery to registration         |
+|                       | (0=short, 1=long)                         |
++-----------------------+-------------------------------------------+
+| node4:                | more than 4 positive lymph nodes          |
++-----------------------+-------------------------------------------+
+| etype:                | event type: 1=recurrence,2=death          |
++-----------------------+-------------------------------------------+
+|                       |                                           |
++-----------------------+-------------------------------------------+
 
 ```{r}
 #| echo: true
@@ -62,8 +89,12 @@ library(janitor)
 library(magrittr)
 library(car)
 library(ggplot2)
+library(tidyverse)
+library(broom)
+library(MASS)
+library(boot)
 
-#print(citation("survival"), bibtex=TRUE)
+#print(citation("boot"), bibtex=TRUE)
 
 ```
 
@@ -92,7 +123,7 @@ Identify participants who had recurrence. Identify those not censored
 for recurrence event. Filter event type = 1 (recurrence), status = 1.
 
 ```{r}
-recurrence <- colon%>%filter(etype == 1 & status == 1)%>%select(id)
+recurrence <- colon%>%filter(etype == 1 & status == 1)%>%dplyr::select(id)
 recurrence <- recurrence%>%mutate(recurrence = 1) # list of patients with recurrence
 
 
@@ -306,28 +337,78 @@ in the Lev+5FU group.
 .tg .tg-j6zm{font-weight:bold;text-align:left;vertical-align:bottom}
 </style>
 ```
-|                                             |                            | Observation (%) | Amisole (%)  | Amisole + 5-FU (%) |
-|---------------|---------------|---------------|---------------|---------------|
-|                                             |                            | N=315           | N=310        | N=304              |
-| Demographics                                |                            |                 |              |                    |
-|                                             | Male                       | 166 (52.3)      | 177 (57.1)   | 141                |
-|                                             | Median age (years) \[IQR\] | 60 \[53,68\]    | 61 \[53,69\] | 61 \[52,70\]       |
-| Cancer characterstics                       |                            |                 |              |                    |
-|                                             | Colon obstruction          | 63 (20.0)       | 63 (20.3)    | 54 (17.8)          |
-|                                             | Colon perforation          | 9 (2.9)         | 10 (3.2)     | 8 (2.6)            |
-|                                             | Adherence to nearby organs | 47 (14.9)       | 49 (15.8)    | 39 (12.8)          |
-| Differentiation of tumor                    |                            |                 |              |                    |
-|                                             | Well                       | 27 (8.6)        | 37 (11.9)    | 29 (9.5)           |
-|                                             | Moderate                   | 236 (74.9)      | 229 (73.9)   | 221 (72.7)         |
-|                                             | Poor                       | 52 (16.5)       | 44 (14.2)    | 54 (17.8)          |
-| Extent of local spread                      |                            |                 |              |                    |
-|                                             | Contiguous                 | 20 (6.3)        | 12 (3.9)     | 11 (3.6)           |
-|                                             | Muscle                     | 38 (12.1)       | 36 (11.6)    | 32 (10.5)          |
-|                                             | Serosa                     | 249 (79.0)      | 259 (83.5)   | 251 (82.6)         |
-|                                             | Submucosa                  | 8 (2.5)         | 3 (1.0)      | 10 (3.3)           |
-| More than 4 lymh nodes with cancer          | Yes                        | 87 (27.6)       | 89 (28.7)    | 79 (26.0)          |
-| Recurrence (%)                              | Yes                        | 177 (56.2)      | 172 (55.5)   | 119 (39.1)         |
-| Short time from surgery to registration (%) | Yes                        | 91 (28.9)       | 80 (25.8)    | 76 (25.0)          |
++------------+------------+------------+------------+------------+
+|            |            | O          | Amisole    | Amisole +  |
+|            |            | bservation | (%)        | 5-FU (%)   |
+|            |            | (%)        |            |            |
++============+============+============+============+============+
+|            |            | N=315      | N=310      | N=304      |
++------------+------------+------------+------------+------------+
+| D          |            |            |            |            |
+| e          |            |            |            |            |
+| mographics |            |            |            |            |
++------------+------------+------------+------------+------------+
+|            | Male       | 166 (52.3) | 177 (57.1) | 141        |
++------------+------------+------------+------------+------------+
+|            | Median age | 60         | 61         | 61         |
+|            | (years)    | \[53,68\]  | \[53,69\]  | \[52,70\]  |
+|            | \[IQR\]    |            |            |            |
++------------+------------+------------+------------+------------+
+| Cancer cha |            |            |            |            |
+| r          |            |            |            |            |
+| acterstics |            |            |            |            |
++------------+------------+------------+------------+------------+
+|            | Colon      | 63 (20.0)  | 63 (20.3)  | 54 (17.8)  |
+|            | o          |            |            |            |
+|            | bstruction |            |            |            |
++------------+------------+------------+------------+------------+
+|            | Colon      | 9 (2.9)    | 10 (3.2)   | 8 (2.6)    |
+|            | p          |            |            |            |
+|            | erforation |            |            |            |
++------------+------------+------------+------------+------------+
+|            | Adherence  | 47 (14.9)  | 49 (15.8)  | 39 (12.8)  |
+|            | to nearby  |            |            |            |
+|            | organs     |            |            |            |
++------------+------------+------------+------------+------------+
+| Diff       |            |            |            |            |
+| e          |            |            |            |            |
+| rentiation |            |            |            |            |
+| of tumor   |            |            |            |            |
++------------+------------+------------+------------+------------+
+|            | Well       | 27 (8.6)   | 37 (11.9)  | 29 (9.5)   |
++------------+------------+------------+------------+------------+
+|            | Moderate   | 236 (74.9) | 229 (73.9) | 221 (72.7) |
++------------+------------+------------+------------+------------+
+|            | Poor       | 52 (16.5)  | 44 (14.2)  | 54 (17.8)  |
++------------+------------+------------+------------+------------+
+| Extent of  |            |            |            |            |
+| local      |            |            |            |            |
+| spread     |            |            |            |            |
++------------+------------+------------+------------+------------+
+|            | Contiguous | 20 (6.3)   | 12 (3.9)   | 11 (3.6)   |
++------------+------------+------------+------------+------------+
+|            | Muscle     | 38 (12.1)  | 36 (11.6)  | 32 (10.5)  |
++------------+------------+------------+------------+------------+
+|            | Serosa     | 249 (79.0) | 259 (83.5) | 251 (82.6) |
++------------+------------+------------+------------+------------+
+|            | Submucosa  | 8 (2.5)    | 3 (1.0)    | 10 (3.3)   |
++------------+------------+------------+------------+------------+
+| More than  | Yes        | 87 (27.6)  | 89 (28.7)  | 79 (26.0)  |
+| 4 lymh     |            |            |            |            |
+| nodes with |            |            |            |            |
+| cancer     |            |            |            |            |
++------------+------------+------------+------------+------------+
+| Recurrence | Yes        | 177 (56.2) | 172 (55.5) | 119 (39.1) |
+| (%)        |            |            |            |            |
++------------+------------+------------+------------+------------+
+| Short time | Yes        | 91 (28.9)  | 80 (25.8)  | 76 (25.0)  |
+| from       |            |            |            |            |
+| surgery to |            |            |            |            |
+| r          |            |            |            |            |
+| e          |            |            |            |            |
+| gistration |            |            |            |            |
+| (%)        |            |            |            |            |
++------------+------------+------------+------------+------------+
 
 # III. Methods
 
@@ -381,7 +462,14 @@ group.
 Multicolinearity was tested using Variant Inflation Factor (VIF)
 calculated using MASS package [@MASS].
 
-# IV. Cox regression model
+The R MASS package was used for Stepwise model selection, using "both"
+forward and backward variable selection [@MASS]. For Stepwise selection,
+stepAIC() function uses AIC (Akaike Information Criterion) as the
+measure to add or remove predictors from the model. Model performance
+was evaluated using 100-fold cross-validation using the boot package
+[@boot1] [@boot2].
+
+# IV. Analysis: Cox regression model
 
 #### Plot survival times
 
@@ -498,9 +586,12 @@ p-value is \>0.05, indicating that the the assumption is met.
 #| message: false
 #| warning: false
 
+# Subset data for modeling
+df <- colon_surv%>%dplyr::select(!c(id,study,etype,death,differ,recurrence, extent,surg_to_reg_time, idcount, order, nodes))
+
 # multivariant analysis
-m2 <- coxph(Surv(time, status) ~ rx+ age + sex + perfor + adhere + surg + obstruct + differentiation +
-              recurrence + local_spread, data = colon_surv)
+m2 <- coxph(Surv(time, status) ~ rx+ age + sex + perfor + adhere + surg + obstruct + differentiation + node4+
+              local_spread, data = df)  
 summary(m2)
 
 
@@ -521,12 +612,12 @@ print(vif)
 **Insight:** None of the variables have VIF values above 5, therefore
 there is no multicollinearity
 
-#### Model survival while including different cancer characteristics as predictors separately to identify significance predictors.
+#### Variable selection method 1. Model survival while including different cancer characteristics as predictors separately to identify significance predictors.
 
 ```{r}
 
-m2 <- coxph(Surv(time, status) ~ rx+ age + sex + perfor + adhere + surg + obstruct + differentiation +
-              recurrence + local_spread, data = colon_surv)
+m2 <- coxph(Surv(time, status) ~ rx+ age + sex + perfor + adhere + surg + obstruct + differentiation + node4+
+              local_spread, data = df)  
 
 # Treatment
 m2a <- coxph(Surv(time, status) ~ rx, data = colon_surv) # significant
@@ -550,8 +641,8 @@ m2f <- coxph(Surv(time, status) ~ local_spread, data = colon_surv) # significant
 summary(m2f)
 
 # Recurrence
-m2g <- coxph(Surv(time, status) ~ recurrence, data = colon_surv) # significant
-summary(m2g)
+# m2g <- coxph(Surv(time, status) ~ recurrence, data = colon_surv) # significant
+# summary(m2g)
 
 # short time from surgery to registration
 m2h <- coxph(Surv(time, status) ~ surg, data = colon_surv) # significant
@@ -559,16 +650,10 @@ summary(m2h)
 
 
 # include significant predictors in final model
-model <- coxph(Surv(time, status) ~ rx + adhere + surg + obstruct + differentiation + recurrence
+model <- coxph(Surv(time, status) ~ rx + adhere + surg + obstruct + differentiation
               + local_spread, data = colon_surv)
 
 summary(model)
-
-# remove differentiation, obstruct and recurrence bc they don't meet proportional hazards assumption
-model_2 <- coxph(Surv(time, status) ~ rx + adhere + surg + obstruct +
-                   local_spread, data = colon_surv)
-
-summary(model_2)
 
 
 ```
@@ -577,40 +662,153 @@ summary(model_2)
 
 ```{R}
 cox.zph(model)
-zph_test <- cox.zph(model)
+zph_test <- cox.zph(m2)
 
 print(zph_test)
 
 # plot the Schoenfeld residuals
 plot(zph_test)
 
-# test PH assumption after removing variables that did not meet assumption
-cox.zph(model_3)
-zph_test3 <- cox.zph(model_3)
-
-print(zph_test3)
-
-# plot the Schoenfeld residuals
-plot(zph_test3)
 
 ```
 
-**Insight:** Differentiation and recurrence do not meet proportional
-hazards assumption.
+**Insight:** Differentiation variable does not meet proportional hazards
+assumption.
+
+#### Variable selection method 2: Use the MASS package stepAIC() function for stepwise selection by using AIC (Akaike Information Criterion) as the measure to add or remove predictors from the model.
+
+```{R}
+
+library(MASS)       # for stepwise regression
+library(boot)       # for cross-validation
+```
+
+### Perform Stepwise variable selection
+
+```{R}
+
+# stepwise selection
+stepwise_model <- stepAIC(m2, direction = "both")
+
+summary(stepwise_model)
+```
 
 ```{r}
 
+# FINAL MODEL
+
+m2_select <- coxph(formula = Surv(time, status) ~ rx + age + surg + obstruct + 
+    differentiation + node4 + local_spread, data = df)
+
+summary(m2_select)
+
+cox_summary <- tidy(m2_select)
 
 
-ggplot(colon_surv, aes(x=time, y=age)) +
-  geom_point(alpha =0.6) + 
-  theme_bw()
 
-ggplot(colon_surv, aes(x=time, y=rx)) +
-  geom_point(alpha =0.6) + 
-  theme_minimal()
-
-ggplot(colon_surv, aes(x=time, y=recurrence)) +
-  geom_point(alpha =0.6) + 
-  theme_minimal()
 ```
+
+### Cross-Validation for Model Evaluation
+
+```{r}
+#| echo: true
+#| message: false
+#| warning: false
+
+# cross validation function
+cv_cox <- function(data, indices) {
+  # subset data
+  d <- data[indices, ]
+  
+  # fit model on subset
+  fit <- coxph(Surv(time, status) ~ rx + surg + obstruct + differentiation + node4 +
+    local_spread, data = df)
+  
+  # return the concordance index (C-index)
+  return(survConcordance(Surv(time, status) ~ predict(fit), data = d)$concordance)
+}
+
+# Set seed for reproducibility
+set.seed(45)
+
+# perform 100-fold cross-validation
+cv_results <- boot(data = df, statistic = cv_cox, R = 100)
+
+cv_results
+```
+
+### Visualization of cross-validation results: plot concordance index from bootstrap samples
+
+```{R}
+# Print summary of cross-validation results
+median(cv_results$t)
+# Visualize results
+
+plot(cv_results)
+
+```
+
+**Insight:** The concordance index (c-index) of the original model
+(0.67) is higher than the median bootstrap samples concordance (0.5),
+suggesting overestimation of of model performance on the original
+dataset. The model predictive power is not needs improvement based on
+the c-index.
+
+# V. Results
+
+### Table 2. Unadjusted model: Survival after Chemotherapy for stage B/C Colon Cancer
+
++----------------+-------------+--------------+--------------+--------------+---------+
+| Treatment      | Coefficient | Hazard ratio | 95% CI_upper | 95% CI_lower | P-value |
++================+=============+==============+==============+==============+=========+
+| Amisole (Lev)  | -0.027      | 0.974        | 0.784        | 1.209        | 0.809   |
++----------------+-------------+--------------+--------------+--------------+---------+
+| Amisole + 5-FU | -0.372      | 0.690        | 0.546        | 0.870        | 0.002   |
++----------------+-------------+--------------+--------------+--------------+---------+
+
+### Table 3. Adjusted model: Survival after Chemotherapy for stage B/C Colon Cancer
+
++----------+----------+----------+----------+----------+----------+
+| T        | Coe      | Hazard   | 95%      | 95%      | P-value  |
+| reatment | fficient | ratio    | CI_upper | CI_lower |          |
++==========+==========+==========+==========+==========+==========+
+| Amisole  | -0.011   | 0.989    | 0.795    | 1.231    | 0.923    |
+| (Lev)    |          |          |          |          |          |
++----------+----------+----------+----------+----------+----------+
+| A        | -0.376   | 0.687    | 0.543    | 0.868    | 0.002    |
+| misole + |          |          |          |          |          |
+| 5-FU     |          |          |          |          |          |
++----------+----------+----------+----------+----------+----------+
+| Age      | 0.007    | 1.007    | 0.999    | 1.015    | 0.069    |
++----------+----------+----------+----------+----------+----------+
+| Surge    | 0.244    | 1.276    | 1.042    | 1.562    | 0.018    |
++----------+----------+----------+----------+----------+----------+
+| Obs      | 0.283    | 1.327    | 1.057    | 1.667    | 0.015    |
+| truction |          |          |          |          |          |
+| of colon |          |          |          |          |          |
++----------+----------+----------+----------+----------+----------+
+| Diff     | 0.374    | 1.453    | 1.145    | 1.844    | 0.002    |
+| erentiat |          |          |          |          |          |
+| ion_poor |          |          |          |          |          |
++----------+----------+----------+----------+----------+----------+
+| Diff     | 0.069    | 1.072    | 0.774    | 1.483    | 0.677    |
+| erentiat |          |          |          |          |          |
+| ion_well |          |          |          |          |          |
++----------+----------+----------+----------+----------+----------+
+| More     | 0.930    | 2.534    | 2.089    | 3.074    | 3.745 x  |
+| than 4   |          |          |          |          | 10\^21   |
+| nodes    |          |          |          |          |          |
+| (+)      |          |          |          |          |          |
++----------+----------+----------+----------+----------+----------+
+| Local    | -0.996   | 0.370    | 0.225    | 0.606    | 7.849 x  |
+| sprea    |          |          |          |          | 10\^5    |
+| d_muscle |          |          |          |          |          |
++----------+----------+----------+----------+----------+----------+
+| Local    | -0.501   | 0.606    | 0.414    | 0.886    | 0.010    |
+| sprea    |          |          |          |          |          |
+| d_serosa |          |          |          |          |          |
++----------+----------+----------+----------+----------+----------+
+| Local    | -1.322   | 0.267    | 0.093    | 0.763    | 0.014    |
+| spread_s |          |          |          |          |          |
+| ubmucosa |          |          |          |          |          |
++----------+----------+----------+----------+----------+----------+
