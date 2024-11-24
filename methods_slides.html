@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Kayla Boyd and Hermela Shimelis">
-<meta name="dcterms.date" content="2024-10-20">
+<meta name="dcterms.date" content="2024-11-16">
 
 <title>Survival analysis</title>
 <style>
@@ -86,7 +86,7 @@ div.csl-indent {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">October 20, 2024</p>
+      <p class="date">November 16, 2024</p>
     </div>
   </div>
   
@@ -99,10 +99,10 @@ div.csl-indent {
 <section id="intro-to-cox-regression" class="level2">
 <h2 class="anchored" data-anchor-id="intro-to-cox-regression">Intro to Cox Regression</h2>
 <ul>
-<li><p>Cox regression is a popular regression modeling method used to predict survival rates given certain covariates.</p></li>
+<li><p>Cox regression is a popular regression modeling method used to explore the relationship between survival time and covariates.</p></li>
 <li><p>It assumes that the effects of different variables on the outcome, survival, are constant over time.</p>
 <ul>
-<li><p>“Survival” can refer to the development of a symptom, time to relapse after remission, or as a time to death <span class="citation" data-cites="Walters2012"><a href="#ref-Walters2012" role="doc-biblioref"><strong>Walters2012?</strong></a></span>.</p></li>
+<li><p>“Survival” can refer to the development of a symptom, time to relapse after remission, or as a time to death <span class="citation" data-cites="Walters2012"><a href="#ref-Walters2012" role="doc-biblioref">[1]</a></span>.</p></li>
 <li><p>Cox regression model is based on the hazard function <span class="math inline">\(h_x(t)\)</span> with covariates at time t given by:</p>
 <p><span class="math display">\[h_x(t)=h_0(t)\exp(\beta_1x_1 +\beta_2x_2 + \dots + \beta_p x_n) \]</span> <span class="math display">\[h_x(t) = hazard \ function\ \]</span> <span class="math display">\[h_0(t) = Baseline \ hazard \ function\ \]</span></p>
 <p><span class="math display">\[\beta_1x_1 +\beta_2x_2 + \dots + \beta_p x_n = linear\ combination\ of \ covariates\ and\ their\ coefficients\]</span></p></li>
@@ -113,9 +113,9 @@ div.csl-indent {
 <section id="hazard-ratios-and-proportional-hazards" class="level2">
 <h2 class="anchored" data-anchor-id="hazard-ratios-and-proportional-hazards">Hazard Ratios and Proportional Hazards</h2>
 <ul>
-<li><p>The hazard function is the probability that an individual will experience an event (death) within a certain time interval <span class="citation" data-cites="Walters2012"><a href="#ref-Walters2012" role="doc-biblioref"><strong>Walters2012?</strong></a></span>.</p></li>
-<li><p>If the risk factor is binary, the result can be interpreted as the estimated increase in HR in patients with the risk factor vs.&nbsp;those without <span class="citation" data-cites="Abd_ElHafeez2021"><a href="#ref-Abd_ElHafeez2021" role="doc-biblioref"><strong>Abd_ElHafeez2021?</strong></a></span>.</p></li>
-<li><p>If the risk factor is continuous, the HR is interpreted as an increase/decrease in the hazard rate of death due to a 1 unit increase in the variable <span class="citation" data-cites="Abd_ElHafeez2021"><a href="#ref-Abd_ElHafeez2021" role="doc-biblioref"><strong>Abd_ElHafeez2021?</strong></a></span>.</p></li>
+<li><p>The hazard function is the probability that an individual will experience an event (death) within a certain time interval <span class="citation" data-cites="Walters2012"><a href="#ref-Walters2012" role="doc-biblioref">[1]</a></span>.</p></li>
+<li><p>If the risk factor is binary, the result can be interpreted as the estimated increase in HR in patients with the risk factor vs.&nbsp;those without <span class="citation" data-cites="Abd_ElHafeez2021"><a href="#ref-Abd_ElHafeez2021" role="doc-biblioref">[2]</a></span>.</p></li>
+<li><p>If the risk factor is continuous, the HR is interpreted as an increase/decrease in the hazard rate of death due to a 1 unit increase in the variable <span class="citation" data-cites="Abd_ElHafeez2021"><a href="#ref-Abd_ElHafeez2021" role="doc-biblioref">[2]</a></span>.</p></li>
 <li><p>The assumption of a constant relationship between dependent and explanatory variables is called proportional hazards.</p></li>
 </ul>
 <hr>
@@ -141,15 +141,15 @@ div.csl-indent {
 <h2 class="anchored" data-anchor-id="time-varying-coefficients">Time-Varying Coefficients</h2>
 <ul>
 <li><p>Failing to meet the assumption of proportional hazards means that the effects between dependent and explanatory variables are not constant over time.</p></li>
-<li><p>Time-varying covariates (coefficients) are used when a covariate changes over time during the follow-up period <span class="citation" data-cites="Zhang2018"><a href="#ref-Zhang2018" role="doc-biblioref"><strong>Zhang2018?</strong></a></span>.</p>
+<li><p>Time-varying covariates (coefficients) are used when a covariate changes over time during the follow-up period <span class="citation" data-cites="Zhang2018"><a href="#ref-Zhang2018" role="doc-biblioref">[3]</a></span>.</p>
 <ul>
 <li>Example: The effect of the size of a patient’s tumor on their chances of survival.</li>
 </ul></li>
-<li><p>Internal time-varying coefficients are affected by survival status and include values that are generated by the subject <span class="citation" data-cites="Zhang2018"><a href="#ref-Zhang2018" role="doc-biblioref"><strong>Zhang2018?</strong></a></span>.</p>
+<li><p>Internal time-varying coefficients are affected by survival status and include values that are generated by the subject <span class="citation" data-cites="Zhang2018"><a href="#ref-Zhang2018" role="doc-biblioref">[3]</a></span>.</p>
 <ul>
 <li>A patient’s blood pressure levels during a study on cardiovascular events.</li>
 </ul></li>
-<li><p>External time-varying coefficients are pre-determined and external to the subject under study <span class="citation" data-cites="Zhang2018"><a href="#ref-Zhang2018" role="doc-biblioref"><strong>Zhang2018?</strong></a></span>.</p>
+<li><p>External time-varying coefficients are pre-determined and external to the subject under study <span class="citation" data-cites="Zhang2018"><a href="#ref-Zhang2018" role="doc-biblioref">[3]</a></span>.</p>
 <ul>
 <li>Pollen levels during a study on patients with asthma.</li>
 </ul></li>
@@ -157,8 +157,16 @@ div.csl-indent {
 </section>
 <section id="references" class="level2">
 <h2 class="anchored" data-anchor-id="references">References</h2>
-<div id="refs" role="list">
-
+<div id="refs" class="references csl-bib-body" role="list">
+<div id="ref-Walters2012" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[1] </div><div class="csl-right-inline">S. J. Walters, <span>“Analyzing time to event outcomes with a cox regression model,”</span> <em>Wiley Interdiscip. Rev. Comput. Stat.</em>, vol. 4, no. 3, pp. 310–315, May 2012.</div>
+</div>
+<div id="ref-Abd_ElHafeez2021" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[2] </div><div class="csl-right-inline">S. Abd ElHafeez, G. D’Arrigo, D. Leonardis, M. Fusaro, G. Tripepi, and S. Roumeliotis, <span>“Methods to analyze time-to-event data: The cox regression analysis,”</span> <em>Oxid. Med. Cell. Longev.</em>, vol. 2021, no. 1, p. 1302811, Nov. 2021.</div>
+</div>
+<div id="ref-Zhang2018" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[3] </div><div class="csl-right-inline">Z. Zhang, J. Reinikainen, K. A. Adeleke, M. E. Pieterse, and C. G. M. Groothuis-Oudshoorn, <span>“Time-varying covariates and coefficients in cox regression models,”</span> <em>Ann. Transl. Med.</em>, vol. 6, no. 7, pp. 121–121, Apr. 2018.</div>
+</div>
 </div>
 </section>
 

@@ -16,7 +16,7 @@ editor:
 ## Intro to Cox Regression
 
 -   Cox regression is a popular regression modeling method used to
-    predict survival rates given certain covariates.
+    explore the relationship between survival time and covariates.
 
 -   It assumes that the effects of different variables on the outcome,
     survival, are constant over time.
@@ -77,6 +77,8 @@ editor:
     # Fit a Kaplan-Meier survival curve
     fit <- survfit(Surv(time, status) ~ sex, data = lung)
     ```
+
+
 
 ```{r, warning=FALSE, echo=F}
 # Plot the Kaplan-Meier survival curves
