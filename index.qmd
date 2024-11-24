@@ -37,7 +37,7 @@ The purpose of this project is to compare survival between the untreated
 Column names:
 
 |           |                                                                                   |
-|:----------|:----------------------------------------------------------------------------------|
+|:-------------|:---------------------------------------------------------|
 | id:       | id                                                                                |
 | study:    | 1 for all patients                                                                |
 | rx:       | Treatment - Obs(ervation), Lev(amisole), Lev(amisole)+5-FU                        |
@@ -311,7 +311,7 @@ between the three groups.
 </style>
 ```
 |                                             |                            | Observation (%) | Amisole (%)  | Amisole + 5-FU (%) |
-|---------------------------------------------|----------------------------|:---------------:|:------------:|:------------------:|
+|---------------------|-------------|:-----------:|:-----------:|:-----------:|
 |                                             |                            |      N=315      |    N=310     |       N=304        |
 | **Demographics**                            |                            |                 |              |                    |
 |                                             | Male                       |   166 (52.3)    |  177 (57.1)  |        141         |
@@ -720,14 +720,14 @@ c-index.
 ### Table 2. Univariate model: Survival after Chemotherapy for stage B/C Colon Cancer
 
 | Treatment      | Coefficient | Hazard ratio | 95% CI_upper | 95% CI_lower | P-value |
-|----------------|:-----------:|:------------:|:------------:|:------------:|:-------:|
+|------------|:----------:|:----------:|:----------:|:----------:|:----------:|
 | Amisole (Lev)  |   -0.027    |    0.974     |    0.784     |    1.209     |  0.809  |
 | Amisole + 5-FU |   -0.372    |    0.690     |    0.546     |    0.870     |  0.002  |
 
 ### Table 3. Multivariate model: Survival after Chemotherapy for stage B/C Colon Cancer
 
 | Treatment              | Coefficient | Hazard ratio | 95% CI_upper | 95% CI_lower |    P-value     |
-|------------------------|:-----------:|:------------:|:------------:|:------------:|:--------------:|
+|------------|:----------:|:----------:|:----------:|:----------:|:----------:|
 | Amisole (Lev)          |   -0.011    |    0.989     |    0.795     |    1.231     |     0.923      |
 | Amisole + 5-FU         |   -0.376    |    0.687     |    0.543     |    0.868     |     0.002      |
 | Age                    |    0.007    |    1.007     |    0.999     |    1.015     |     0.069      |
